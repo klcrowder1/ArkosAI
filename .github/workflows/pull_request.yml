@@ -109,6 +109,6 @@ jobs:
       - name: Build
         run: make
       - name: Run mypy
-        run: docker run --rm --entrypoint=python3 frigate:latest -u -m mypy --config-file frigate/mypy.ini frigate
+        run: docker run --rm --entrypoint=python3 arkos:latest -u -m mypy --config-file frigate/mypy.ini frigate
       - name: Run tests
-        run: docker run --rm --entrypoint=python3 frigate:latest -u -m unittest
+        run: docker run --rm --entrypoint=python3 arkos:latest -u -m unittest

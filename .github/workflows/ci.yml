@@ -1,4 +1,4 @@
-name: CI
+name: Continuous Integration
 
 on:
   workflow_dispatch:
@@ -38,7 +38,7 @@ jobs:
           file: docker/main/Dockerfile
           push: true
           platforms: linux/amd64
-          target: frigate
+          target: arkos
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
   arm64_build:
@@ -61,7 +61,7 @@ jobs:
           file: docker/main/Dockerfile
           push: true
           platforms: linux/arm64
-          target: frigate
+          target: arkos
           tags: |
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64

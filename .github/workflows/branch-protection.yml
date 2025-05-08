@@ -1,0 +1,26 @@
+name: Branch Protection
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/branch-protection.yml'
+
+jobs:
+  apply-branch-protection:
+    runs-on: ubuntu-latest
+    name: Apply Branch Protection Rules
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          
+      - name: Apply branch protection rules
+        uses: relaxdiego/github-branch-protection-bot@v1
+        with:
+          config-file: .github/branch-protection.yml
+          github-token: ${{ secrets.ADMIN_TOKEN }}
+          dry-run: false
