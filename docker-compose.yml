@@ -1,6 +1,6 @@
 services:
   devcontainer:
-    container_name: frigate-devcontainer
+    container_name: arkos-devcontainer
     # Check host system's actual render/video/plugdev group IDs with 'getent group render', 'getent group video', and 'getent group plugdev'
     # Must add these exact IDs in container's group_add section or OpenVINO GPU acceleration will fail
     group_add:
@@ -28,11 +28,11 @@ services:
       # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
-      - .:/workspace/frigate:cached
-      - ./web/dist:/opt/frigate/web:cached
+      - .:/workspace/arkos:cached
+      - ./web/dist:/opt/arkos/web:cached
       - /etc/localtime:/etc/localtime:ro
       - ./config:/config
-      - ./debug:/media/frigate
+      - ./debug:/media/arkos
      # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
   mqtt:
     container_name: mqtt

@@ -1,0 +1,114 @@
+site_name: Arkos AI Documentation
+site_url: https://docs.arkos.ai
+site_description: Documentation for Arkos AI - Advanced Network Video Recorder with AI-powered Analytics
+site_author: Arkos AI Team
+
+repo_name: ArkosAI/ArkosAI
+repo_url: https://github.com/ArkosAI/ArkosAI
+edit_uri: edit/dev/docs/
+
+theme:
+  name: material
+  logo: static/img/logo.png
+  favicon: static/img/favicon.ico
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - redirects:
+      redirect_maps:
+        'index.md': 'getting-started.md'
+  - macros
+  - glightbox
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: ArkosAI
+      repo: ArkosAI
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Features:
+    - Object Detection: features/object-detection.md
+    - Audio Detection: features/audio-detection.md
+    - Camera Management: features/camera-management.md
+    - Recording: features/recording.md
+    - Events: features/events.md
+    - Notifications: features/notifications.md
+  - Advanced:
+    - Hardware Acceleration: advanced/hardware-acceleration.md
+    - Custom Models: advanced/custom-models.md
+    - API: advanced/api.md
+  - Troubleshooting: troubleshooting.md
+  - FAQ: faq.md
+  - Contributing: contributing.md
