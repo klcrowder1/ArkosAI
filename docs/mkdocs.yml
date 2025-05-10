@@ -97,18 +97,45 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Installation: installation.md
-  - Configuration: configuration.md
+  - Configuration:
+    - Overview: configuration.md
+    - Advanced: docs/configuration/advanced.md
+    - Audio Detectors: docs/configuration/audio_detectors.md
+    - Authentication: docs/configuration/authentication.md
+    - Autotracking: docs/configuration/autotracking.md
+    - Bird Classification: docs/configuration/bird_classification.md
+    - Birdseye: docs/configuration/birdseye.md
+    - Camera Specific: docs/configuration/camera_specific.md
+    - Cameras: docs/configuration/cameras.md
+    - Face Recognition: docs/configuration/face_recognition.md
+    - FFmpeg Presets: docs/configuration/ffmpeg_presets.md
+    - GenAI: docs/configuration/genai.md
+    - Hardware Acceleration (Enrichments): docs/configuration/hardware_acceleration_enrichments.md
+    - Hardware Acceleration (Video): docs/configuration/hardware_acceleration_video.md
+    - License Plate Recognition: docs/configuration/license_plate_recognition.md
+    - Live: docs/configuration/live.md
+    - Masks: docs/configuration/masks.md
+    - Metrics: docs/configuration/metrics.md
+    - Motion Detection: docs/configuration/motion_detection.md
+    - Notifications: docs/configuration/notifications.md
+    - Object Detectors: docs/configuration/object_detectors.md
+    - Object Filters: docs/configuration/object_filters.md
+    - Objects: docs/configuration/objects.md
+    - PWA: docs/configuration/pwa.md
+    - Record: docs/configuration/record.md
+    - Reference: docs/configuration/reference.md
+    - Restream: docs/configuration/restream.md
+    - Review: docs/configuration/review.md
+    - Semantic Search: docs/configuration/semantic_search.md
+    - Snapshots: docs/configuration/snapshots.md
+    - Stationary Objects: docs/configuration/stationary_objects.md
+    - TLS: docs/configuration/tls.md
+    - Zones: docs/configuration/zones.md
   - Features:
     - Object Detection: features/object-detection.md
-    - Audio Detection: features/audio-detection.md
-    - Camera Management: features/camera-management.md
-    - Recording: features/recording.md
-    - Events: features/events.md
-    - Notifications: features/notifications.md
   - Advanced:
     - Hardware Acceleration: advanced/hardware-acceleration.md
-    - Custom Models: advanced/custom-models.md
-    - API: advanced/api.md
   - Troubleshooting: troubleshooting.md
   - FAQ: faq.md
   - Contributing: contributing.md
+  - MDX: docs/mdx.md
