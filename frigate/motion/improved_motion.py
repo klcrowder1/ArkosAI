@@ -6,7 +6,7 @@ from scipy.ndimage import gaussian_filter
 
 from frigate.camera import PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
-from frigate.config import MotionConfig
+from frigate.config.camera.motion import MotionConfig
 from frigate.motion import MotionDetector
 from frigate.util.image import grab_cv2_contours
 
@@ -24,6 +24,7 @@ class ImprovedMotionDetector(MotionDetector):
         blur_radius=1,
         interpolation=cv2.INTER_NEAREST,
         contrast_frame_history=50,
+        **kwargs
     ):
         self.name = name
         self.config = config
@@ -71,7 +72,8 @@ class ImprovedMotionDetector(MotionDetector):
         # if ptz motor is moving from autotracking, quickly return
         # a single box that is 80% of the frame
         if (
-            self.ptz_metrics.autotracker_enabled.value
+            self.ptz_metrics is not None
+            and self.ptz_metrics.autotracker_enabled.value
             and not self.ptz_metrics.motor_stopped.is_set()
         ):
             return [
@@ -174,7 +176,8 @@ class ImprovedMotionDetector(MotionDetector):
         # if so, reassign the average to the current frame so we begin with a new baseline
         if (
             # ensure we only do this for cameras with autotracking enabled
-            self.ptz_metrics.autotracker_enabled.value
+            self.ptz_metrics is not None
+            and self.ptz_metrics.autotracker_enabled.value
             and self.ptz_metrics.motor_stopped.is_set()
             and (
                 self.last_stop_time is None

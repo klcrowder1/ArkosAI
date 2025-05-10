@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-from frigate.config import MotionConfig
+from frigate.config.camera.motion import MotionConfig
 
 
 class MotionDetector(ABC):
@@ -11,9 +11,7 @@ class MotionDetector(ABC):
         frame_shape: Tuple[int, int, int],
         config: MotionConfig,
         fps: int,
-        improve_contrast,
-        threshold,
-        contour_area,
+        **kwargs
     ):
         pass
 
@@ -28,3 +26,10 @@ class MotionDetector(ABC):
     @abstractmethod
     def stop(self):
         pass
+
+# Import detector implementations to make them available when importing from frigate.motion
+from frigate.motion.frigate_motion import FrigateMotionDetector
+from frigate.motion.improved_motion import ImprovedMotionDetector
+from frigate.motion.optimized_motion import OptimizedMotionDetector
+
+__all__ = ["MotionDetector", "FrigateMotionDetector", "ImprovedMotionDetector", "OptimizedMotionDetector"]

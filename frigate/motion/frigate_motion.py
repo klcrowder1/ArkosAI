@@ -1,7 +1,8 @@
 import cv2
+import multiprocessing as mp
 import numpy as np
 
-from frigate.config import MotionConfig
+from frigate.config.camera.motion import MotionConfig
 from frigate.motion import MotionDetector
 from frigate.util.image import grab_cv2_contours
 
@@ -12,9 +13,10 @@ class FrigateMotionDetector(MotionDetector):
         frame_shape,
         config: MotionConfig,
         fps: int,
-        improve_contrast,
-        threshold,
-        contour_area,
+        improve_contrast=None,
+        threshold=None,
+        contour_area=None,
+        **kwargs
     ):
         self.config = config
         self.frame_shape = frame_shape
@@ -34,9 +36,10 @@ class FrigateMotionDetector(MotionDetector):
         )
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
-        self.improve_contrast = improve_contrast
-        self.threshold = threshold
-        self.contour_area = contour_area
+        # For backward compatibility, use multiprocessing Values if provided, otherwise use config values
+        self.improve_contrast = improve_contrast if improve_contrast is not None else mp.Value("i", config.improve_contrast)
+        self.threshold = threshold if threshold is not None else mp.Value("i", config.threshold)
+        self.contour_area = contour_area if contour_area is not None else mp.Value("i", config.contour_area)
 
     def is_calibrating(self):
         return False
@@ -155,3 +158,7 @@ class FrigateMotionDetector(MotionDetector):
             self.motion_frame_count = 0
 
         return motion_boxes
+        
+    def stop(self) -> None:
+        """Stop the motion detector."""
+        pass  # No cleanup needed for this detector
