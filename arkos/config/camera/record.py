@@ -16,6 +16,37 @@ class RetainModeEnum(str, Enum):
     ACTIVE_OBJECTS = "active_objects"
 
 
+class StorageTierTypeEnum(str, Enum):
+    """Storage tier type enumeration."""
+
+    HOT = "hot"
+    WARM = "warm"
+    COLD = "cold"
+    ARCHIVE = "archive"
+
+
+class StorageTierConfig(ArkosBaseModel):
+    """Storage tier configuration."""
+
+    name: str = Field(default="", title="Name of the storage tier")
+    path: str = Field(default="", title="Path to the storage location")
+    type: StorageTierTypeEnum = Field(default=StorageTierTypeEnum.WARM, title="Type of storage tier")
+    priority: int = Field(default=100, title="Priority of the tier (lower is higher priority)")
+    min_age_days: int = Field(default=7, title="Minimum age of recordings in days to be stored in this tier")
+    max_age_days: Optional[int] = Field(default=None, title="Maximum age of recordings in days to be stored in this tier")
+    min_free_space_mb: int = Field(default=1000, title="Minimum free space in MB to maintain on this tier")
+    readonly: bool = Field(default=False, title="Whether this tier is read-only")
+    events_only: bool = Field(default=False, title="Whether this tier should only store event recordings")
+
+
+class TieredStorageConfig(ArkosBaseModel):
+    """Tiered storage configuration."""
+
+    enabled: bool = Field(default=False, title="Enable tiered storage")
+    check_interval: int = Field(default=3600, title="Interval in seconds to check for recordings to move")
+    tiers: List[StorageTierConfig] = Field(default_factory=list, title="Storage tiers")
+
+
 class RetainConfig(ArkosBaseModel):
     """Retention configuration for recordings."""
 
@@ -42,6 +73,17 @@ class RecordEventConfig(ArkosBaseModel):
     retain: RetainConfig = Field(default_factory=RetainConfig, title="Retention configuration")
 
 
+class CompressionConfig(ArkosBaseModel):
+    """Compression configuration for recordings."""
+
+    enabled: bool = Field(default=False, title="Enable compression")
+    codec: str = Field(default="h264", title="Codec to use for compression")
+    quality: int = Field(default=23, title="Quality setting for compression (lower is better)")
+    preset: str = Field(default="medium", title="Preset for compression (slower presets give better quality)")
+    tune: Optional[str] = Field(default=None, title="Tune setting for compression")
+    max_bitrate: Optional[int] = Field(default=None, title="Maximum bitrate in kbps")
+
+
 class RecordConfig(ArkosBaseModel):
     """Recording configuration for a camera."""
 
@@ -65,10 +107,10 @@ class RecordConfig(ArkosBaseModel):
     storage: Dict[str, Any] = Field(default_factory=dict, title="Storage configuration")
     
     # Tiered storage
-    tiered_storage: Dict[str, Any] = Field(default_factory=dict, title="Tiered storage configuration")
+    tiered_storage: TieredStorageConfig = Field(default_factory=TieredStorageConfig, title="Tiered storage configuration")
     
     # Compression
-    compression: Dict[str, Any] = Field(default_factory=dict, title="Compression configuration")
+    compression: CompressionConfig = Field(default_factory=CompressionConfig, title="Compression configuration")
     
     # Experimental features
     experimental: Dict[str, Any] = Field(default_factory=dict, title="Experimental features")

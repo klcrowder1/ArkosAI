@@ -180,17 +180,89 @@ Apple devices running the Safari browser may fail to playback h.265 recordings. 
 
 ## Syncing Recordings With Disk
 
-In some cases the recordings files may be deleted but Frigate will not know this has happened. Recordings sync can be enabled which will tell Frigate to check the file system and delete any db entries for files which don't exist.
+In some cases the recordings files may be deleted but Arkos will not know this has happened. Recordings sync can be enabled which will tell Arkos to check the file system and delete any db entries for files which don't exist.
 
 ```yaml
 record:
   sync_recordings: True
 ```
 
-This feature is meant to fix variations in files, not completely delete entries in the database. If you delete all of your media, don't use `sync_recordings`, just stop Frigate, delete the `frigate.db` database, and restart.
+This feature is meant to fix variations in files, not completely delete entries in the database. If you delete all of your media, don't use `sync_recordings`, just stop Arkos, delete the `arkos.db` database, and restart.
 
 :::warning
 
 The sync operation uses considerable CPU resources and in most cases is not needed, only enable when necessary.
 
 :::
+
+## Tiered Storage
+
+Arkos supports tiered storage for recordings, allowing you to optimize storage costs and performance by moving recordings between different storage tiers based on age and importance.
+
+### Configuration
+
+Tiered storage is configured in the `record` section of your configuration file:
+
+```yaml
+record:
+  # Tiered storage configuration
+  tiered_storage:
+    enabled: true
+    check_interval: 3600  # Check interval in seconds
+    tiers:
+      # Hot tier (fast, expensive storage for recent recordings)
+      - name: hot
+        path: /media/ssd/recordings
+        type: hot
+        priority: 0
+        min_age_days: 0
+        max_age_days: 7
+        min_free_space_mb: 5000
+        readonly: false
+        events_only: false
+      
+      # Warm tier (medium-speed storage for older recordings)
+      - name: warm
+        path: /media/hdd/recordings
+        type: warm
+        priority: 100
+        min_age_days: 7
+        max_age_days: 30
+        min_free_space_mb: 10000
+        readonly: false
+        events_only: false
+      
+      # Cold tier (slow, inexpensive storage for archival recordings)
+      - name: cold
+        path: /media/nas/recordings
+        type: cold
+        priority: 200
+        min_age_days: 30
+        max_age_days: null  # No maximum age
+        min_free_space_mb: 50000
+        readonly: false
+        events_only: true  # Only store event recordings in this tier
+```
+
+### Configuration Options
+
+#### Global Options
+
+- `enabled`: Enable or disable tiered storage
+- `check_interval`: Interval in seconds to check for recordings to move between tiers
+
+#### Tier Options
+
+Each tier has the following options:
+
+- `name`: Name of the storage tier
+- `path`: Path to the storage location
+- `type`: Type of storage tier (hot, warm, cold, archive)
+- `priority`: Priority of the tier (lower is higher priority)
+- `min_age_days`: Minimum age of recordings in days to be stored in this tier
+- `max_age_days`: Maximum age of recordings in days to be stored in this tier (null for no maximum)
+- `min_free_space_mb`: Minimum free space in MB to maintain on this tier
+- `readonly`: Whether this tier is read-only
+- `events_only`: Whether this tier should only store event recordings
+
+For more detailed information about tiered storage, see the [Tiered Storage](../../features/tiered-storage.md) feature documentation.

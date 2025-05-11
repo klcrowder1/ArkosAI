@@ -79,6 +79,57 @@ events:
         meow_cat: true
         engine_vehicle: true
 
+# Global record configuration
+record:
+  # Global retention configuration
+  retain:
+    days: 7
+    mode: all  # all, motion, active_objects
+  
+  # Sync recordings with disk
+  sync_recordings: true
+  
+  # Expire interval in minutes
+  expire_interval: 60
+  
+  # Tiered storage configuration
+  tiered_storage:
+    enabled: true
+    check_interval: 3600  # Check interval in seconds
+    tiers:
+      # Hot tier (fast, expensive storage for recent recordings)
+      - name: hot
+        path: /media/ssd/recordings
+        type: hot
+        priority: 0
+        min_age_days: 0
+        max_age_days: 7
+        min_free_space_mb: 5000
+        readonly: false
+        events_only: false
+      
+      # Warm tier (medium-speed storage for older recordings)
+      - name: warm
+        path: /media/hdd/recordings
+        type: warm
+        priority: 100
+        min_age_days: 7
+        max_age_days: 30
+        min_free_space_mb: 10000
+        readonly: false
+        events_only: false
+      
+      # Cold tier (slow, inexpensive storage for archival recordings)
+      - name: cold
+        path: /media/nas/recordings
+        type: cold
+        priority: 200
+        min_age_days: 30
+        max_age_days: null  # No maximum age
+        min_free_space_mb: 50000
+        readonly: false
+        events_only: true  # Only store event recordings in this tier
+
 # Camera-specific configuration
 cameras:
   # Standard camera example

@@ -135,6 +135,7 @@ nav:
   - Features:
     - Object Detection: features/object-detection.md
     - Event Filtering: features/event-filtering.md
+    - Tiered Storage: features/tiered-storage.md
   - Advanced:
     - Hardware Acceleration: advanced/hardware-acceleration.md
   - Troubleshooting: troubleshooting.md

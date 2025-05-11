@@ -68,7 +68,7 @@ from arkos.record.record import manage_recordings
 from arkos.review.review import manage_review_segments
 from arkos.stats.emitter import StatsEmitter
 from arkos.stats.util import stats_init
-from arkos.storage import StorageMaintainer
+from arkos.storage import StorageMaintainer, TieredStorageManager
 # Import TimelineProcessor from events module instead of the old one
 from arkos.track.object_processing import TrackedObjectProcessor
 from arkos.util.builtin import empty_and_close_queue
@@ -545,6 +545,16 @@ class ArkosApp:
     def start_storage_maintainer(self) -> None:
         self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
+        
+        # Start tiered storage manager if enabled
+        if self.config.record.tiered_storage.enabled:
+            self.tiered_storage_manager = TieredStorageManager(
+                self.config, 
+                self.stop_event,
+                self.config.record.tiered_storage.check_interval
+            )
+            self.tiered_storage_manager.start()
+            logger.info("Tiered storage manager started")
 
     def start_stats_emitter(self) -> None:
         self.stats_emitter = StatsEmitter(
@@ -796,6 +806,11 @@ class ArkosApp:
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.arkos_watchdog.join()
+        
+        # Stop tiered storage manager if it was started
+        if hasattr(self, 'tiered_storage_manager'):
+            self.tiered_storage_manager.join()
+            
         self.db.stop()
 
         # Save embeddings stats to disk
