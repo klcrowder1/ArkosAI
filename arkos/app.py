@@ -45,7 +45,8 @@ from arkos.db.sqlitevecq import SqliteVecQueueDatabase
 from arkos.embeddings import EmbeddingsContext, manage_embeddings
 from arkos.events.audio import AudioProcessor
 from arkos.events.cleanup import EventCleanup
-from arkos.events.maintainer import EventProcessor
+from arkos.events.processor import EventProcessor
+from arkos.events.timeline import TimelineProcessor
 from arkos.models import (
     Event,
     Export,
@@ -68,7 +69,7 @@ from arkos.review.review import manage_review_segments
 from arkos.stats.emitter import StatsEmitter
 from arkos.stats.util import stats_init
 from arkos.storage import StorageMaintainer
-from arkos.timeline import TimelineProcessor
+# Import TimelineProcessor from events module instead of the old one
 from arkos.track.object_processing import TrackedObjectProcessor
 from arkos.util.builtin import empty_and_close_queue
 from arkos.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
