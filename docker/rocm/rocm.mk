@@ -9,7 +9,7 @@ local-rocm: version
 		HSA_OVERRIDE_GFX_VERSION=$(word 2,$(subst :, ,$(chipset))) \
 		HSA_OVERRIDE=1 \
 		docker buildx bake --file=docker/rocm/rocm.hcl rocm \
-			--set rocm.tags=frigate:latest-rocm-$(word 1,$(subst :, ,$(chipset))) \
+			--set rocm.tags=arkos:latest-rocm-$(word 1,$(subst :, ,$(chipset))) \
 			--load \
 	&&) true
 	
@@ -17,7 +17,7 @@ local-rocm: version
 	HSA_OVERRIDE=0 \
 	AMDGPU=gfx \
 	docker buildx bake --file=docker/rocm/rocm.hcl rocm \
-		--set rocm.tags=frigate:latest-rocm \
+		--set rocm.tags=arkos:latest-rocm \
 		--load
 
 build-rocm: version

@@ -35,7 +35,7 @@ FROM deps AS deps-prelim
 
 RUN apt-get update && apt-get install -y libnuma1
 
-WORKDIR /opt/frigate
+WORKDIR /opt/arkos
 COPY --from=rootfs / /
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
@@ -77,3 +77,7 @@ ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 #######################################################################
 FROM rocm-prelim-hsa-override$HSA_OVERRIDE as rocm-deps
 
+#######################################################################
+FROM rocm-deps as rocm
+
+WORKDIR /opt/arkos
