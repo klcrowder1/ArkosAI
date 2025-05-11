@@ -8,11 +8,14 @@ from typing import Dict, Optional, Tuple, Any
 
 from arkos.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from arkos.config import FrigateConfig
+from arkos.events.correlation import EventCorrelator
+from arkos.events.filter import EventFilter
 from arkos.events.handlers.api import ApiEventHandler
 from arkos.events.handlers.audio import AudioEventHandler
 from arkos.events.handlers.object import TrackedObjectHandler
 from arkos.events.types import EventData, EventStateEnum, EventTypeEnum
 from arkos.models import Event
+from arkos.notifications.manager import NotificationManager
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +48,15 @@ class EventProcessor(threading.Thread):
             EventTypeEnum.API: ApiEventHandler(config),
             EventTypeEnum.AUDIO: AudioEventHandler(config),
         }
+        
+        # Initialize event filter
+        self.event_filter = EventFilter(config)
+        
+        # Initialize event correlator
+        self.event_correlator = EventCorrelator(config)
+        
+        # Initialize notification manager
+        self.notification_manager = NotificationManager(config)
 
         # Initialize communication channels
         self.event_receiver = EventUpdateSubscriber()
@@ -69,8 +81,31 @@ class EventProcessor(threading.Thread):
                 f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
             )
 
+            # Convert event data to EventData object for filtering
+            event_obj = None
             if source_type == EventTypeEnum.TRACKED_OBJECT:
                 id = event_data["id"]
+                
+                # Check if this is a new event
+                is_new_event = event_type == EventStateEnum.START or id not in self.events_in_process
+                
+                # Create event object for filtering
+                if is_new_event:
+                    event_obj = self.handlers[source_type].handle_event(
+                        source_type,
+                        event_type,
+                        camera,
+                        frame_name,
+                        event_data,
+                        None
+                    )
+                    
+                    # Check if the event should be filtered out
+                    if self.event_filter.should_filter_event(source_type, camera, event_obj):
+                        logger.debug(f"Filtered out event: {source_type} {event_type} {camera} {id}")
+                        continue
+                
+                # Add to timeline queue
                 self.timeline_queue.put(
                     (
                         camera,
@@ -82,12 +117,28 @@ class EventProcessor(threading.Thread):
                 )
 
                 # If this is the first message, just store it and continue
-                if event_type == EventStateEnum.START or id not in self.events_in_process:
+                if is_new_event:
                     self.events_in_process[id] = event_data
                     continue
 
                 self.handle_object_detection(event_type, camera, frame_name, event_data)
             elif source_type == EventTypeEnum.API:
+                # Create event object for filtering
+                if event_type == EventStateEnum.START:
+                    event_obj = self.handlers[source_type].handle_event(
+                        source_type,
+                        event_type,
+                        camera,
+                        frame_name,
+                        event_data,
+                        None
+                    )
+                    
+                    # Check if the event should be filtered out
+                    if self.event_filter.should_filter_event(source_type, camera, event_obj):
+                        logger.debug(f"Filtered out event: {source_type} {event_type} {camera} {event_data['id']}")
+                        continue
+                
                 self.timeline_queue.put(
                     (
                         camera,
@@ -100,6 +151,25 @@ class EventProcessor(threading.Thread):
 
                 self.handle_external_detection(event_type, camera, frame_name, event_data)
             elif source_type == EventTypeEnum.AUDIO:
+                # Check if this is a new event
+                is_new_event = event_type == EventStateEnum.START or event_data["id"] not in self.events_in_process
+                
+                # Create event object for filtering
+                if is_new_event:
+                    event_obj = self.handlers[source_type].handle_event(
+                        source_type,
+                        event_type,
+                        camera,
+                        frame_name,
+                        event_data,
+                        None
+                    )
+                    
+                    # Check if the event should be filtered out
+                    if self.event_filter.should_filter_event(source_type, camera, event_obj):
+                        logger.debug(f"Filtered out event: {source_type} {event_type} {camera} {event_data['id']}")
+                        continue
+                
                 self.timeline_queue.put(
                     (
                         camera,
@@ -111,14 +181,16 @@ class EventProcessor(threading.Thread):
                 )
 
                 # If this is the first message, just store it and continue
-                if event_type == EventStateEnum.START or event_data["id"] not in self.events_in_process:
+                if is_new_event:
                     self.events_in_process[event_data["id"]] = event_data
                     continue
 
                 self.handle_audio_detection(event_type, camera, frame_name, event_data)
 
+        # Clean up resources
         self.event_receiver.stop()
         self.event_end_publisher.stop()
+        self.notification_manager.cleanup()
         logger.info("Exiting event processor...")
     
     def handle_object_detection(
@@ -149,6 +221,11 @@ class EventProcessor(threading.Thread):
             self.events_in_process[event_data["id"]],
         )
         
+        # Add event to correlator
+        camera_config = self.config.cameras.get(camera)
+        if camera_config and camera_config.events.correlation.enabled:
+            self.event_correlator.add_event(camera, EventTypeEnum.TRACKED_OBJECT, current_event)
+        
         # Check if we should update the database
         if handler.should_update_db(
             EventData.from_dict(self.events_in_process[event_data["id"]]),
@@ -176,6 +253,54 @@ class EventProcessor(threading.Thread):
         ):
             # Update the stored copy for comparison on future update messages
             self.events_in_process[event_data["id"]] = current_event.to_dict()
+        
+        # Send notification if this is a new event (START)
+        if event_type == EventStateEnum.START:
+            # Check if notifications are enabled for this camera
+            if camera_config and hasattr(camera_config, "notifications"):
+                notification_config = camera_config.notifications
+                
+                # Check if notifications are enabled and if this object type should trigger a notification
+                if (notification_config.enabled and 
+                    (not notification_config.filtered_objects or 
+                     current_event.label not in notification_config.filtered_objects) and
+                    (not notification_config.required_objects or 
+                     current_event.label in notification_config.required_objects)):
+                    
+                    # Check if this event is in any required zones
+                    zones_match = True
+                    if notification_config.required_zones:
+                        zones_match = False
+                        for zone in current_event.zones:
+                            if zone in notification_config.required_zones:
+                                zones_match = True
+                                break
+                    
+                    # Check if this event is in any filtered zones
+                    if zones_match and notification_config.filtered_zones:
+                        for zone in current_event.zones:
+                            if zone in notification_config.filtered_zones:
+                                zones_match = False
+                                break
+                    
+                    # If all conditions are met, send notification
+                    if zones_match:
+                        # Get snapshot path if available
+                        snapshot_path = None
+                        if hasattr(current_event, "has_snapshot") and current_event.has_snapshot:
+                            snapshot_path = f"/clips/{camera}/{current_event.id}/snapshot.jpg"
+                        
+                        # Get clip path if available
+                        clip_path = None
+                        if hasattr(current_event, "has_clip") and current_event.has_clip:
+                            clip_path = f"/clips/{camera}/{current_event.id}/clip.mp4"
+                        
+                        # Send notification
+                        self.notification_manager.notify_event(
+                            event=current_event,
+                            snapshot_path=snapshot_path if notification_config.include_snapshot else None,
+                            clip_path=clip_path if notification_config.include_clip else None,
+                        )
         
         # If this is the end of the event, remove it from the in-process list
         if event_type == EventStateEnum.END:
@@ -209,12 +334,37 @@ class EventProcessor(threading.Thread):
             None,
         )
         
+        # Add event to correlator
+        camera_config = self.config.cameras.get(camera)
+        if camera_config and camera_config.events.correlation.enabled and event_type == EventStateEnum.START:
+            self.event_correlator.add_event(camera, EventTypeEnum.API, current_event)
+        
         # Prepare event data for database insertion
         db_event = handler.prepare_for_db(current_event, camera)
         
         # Insert or update the event in the database
         if event_type == EventStateEnum.START:
             Event.insert(db_event).execute()
+            
+            # Send notification if this is a new event (START)
+            if camera_config and hasattr(camera_config, "notifications"):
+                notification_config = camera_config.notifications
+                
+                # Check if notifications are enabled for API events
+                if notification_config.enabled and "api" in notification_config.triggers:
+                    # Get snapshot path if available
+                    snapshot_path = None
+                    if hasattr(current_event, "has_snapshot") and current_event.has_snapshot:
+                        snapshot_path = f"/clips/{camera}/{current_event.id}/snapshot.jpg"
+                    
+                    # Send notification
+                    self.notification_manager.notify_event(
+                        event=current_event,
+                        title=f"API Event: {current_event.label}",
+                        message=f"API event triggered on {camera}: {current_event.label}",
+                        snapshot_path=snapshot_path if notification_config.include_snapshot else None,
+                    )
+            
         elif event_type == EventStateEnum.END:
             try:
                 Event.update(db_event).where(Event.id == event_data["id"]).execute()
@@ -248,12 +398,37 @@ class EventProcessor(threading.Thread):
             self.events_in_process.get(event_data["id"]),
         )
         
+        # Add event to correlator
+        camera_config = self.config.cameras.get(camera)
+        if camera_config and camera_config.events.correlation.enabled:
+            self.event_correlator.add_event(camera, EventTypeEnum.AUDIO, current_event)
+        
         # Prepare event data for database insertion
         db_event = handler.prepare_for_db(current_event, camera)
         
         # Insert or update the event in the database
         if event_type == EventStateEnum.START:
             Event.insert(db_event).execute()
+            
+            # Send notification if this is a new event (START)
+            if camera_config and hasattr(camera_config, "notifications"):
+                notification_config = camera_config.notifications
+                
+                # Check if notifications are enabled for audio events
+                if notification_config.enabled and "audio" in notification_config.triggers:
+                    # Get snapshot path if available
+                    snapshot_path = None
+                    if hasattr(current_event, "has_snapshot") and current_event.has_snapshot:
+                        snapshot_path = f"/clips/{camera}/{current_event.id}/snapshot.jpg"
+                    
+                    # Send notification
+                    self.notification_manager.notify_event(
+                        event=current_event,
+                        title=f"Audio Event: {current_event.label}",
+                        message=f"Audio detected on {camera}: {current_event.label}",
+                        snapshot_path=snapshot_path if notification_config.include_snapshot else None,
+                    )
+            
         elif event_type == EventStateEnum.END:
             try:
                 Event.update(db_event).where(Event.id == event_data["id"]).execute()

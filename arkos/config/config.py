@@ -43,6 +43,7 @@ from .camera import CameraConfig, CameraLiveConfig
 from .camera.audio import AudioConfig
 from .camera.birdseye import BirdseyeConfig
 from .camera.detect import DetectConfig
+from .camera.events import EventConfig, EventFilterConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig
 from .camera.motion import MotionConfig
@@ -370,6 +371,9 @@ class ArkosConfig(ArkosBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Global object tracking configuration."
     )
+    events: EventConfig = Field(
+        default_factory=EventConfig, title="Global event configuration."
+    )
     ffmpeg: FfmpegConfig = Field(
         default_factory=FfmpegConfig, title="Global FFmpeg configuration."
     )
@@ -454,6 +458,7 @@ class ArkosConfig(ArkosBaseModel):
             include={
                 "audio": ...,
                 "birdseye": ...,
+                "events": ...,
                 "face_recognition": ...,
                 "lpr": ...,
                 "record": ...,

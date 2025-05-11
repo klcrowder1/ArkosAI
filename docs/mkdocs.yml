@@ -105,6 +105,7 @@ nav:
     - Autotracking: docs/configuration/autotracking.md
     - Bird Classification: docs/configuration/bird_classification.md
     - Birdseye: docs/configuration/birdseye.md
+    - Event Filtering: docs/configuration/event_filtering.md
     - Camera Specific: docs/configuration/camera_specific.md
     - Cameras: docs/configuration/cameras.md
     - Face Recognition: docs/configuration/face_recognition.md
@@ -133,6 +134,7 @@ nav:
     - Zones: docs/configuration/zones.md
   - Features:
     - Object Detection: features/object-detection.md
+    - Event Filtering: features/event-filtering.md
   - Advanced:
     - Hardware Acceleration: advanced/hardware-acceleration.md
   - Troubleshooting: troubleshooting.md

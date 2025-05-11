@@ -100,6 +100,7 @@ from arkos.config.camera.thermal import ThermalConfig
 from arkos.config.camera.fisheye import FisheyeConfig
 from arkos.config.camera.multi_sensor import MultiSensorConfig
 from arkos.config.camera.doorbell import DoorbellConfig
+from arkos.config.camera.events import EventConfig
 
 
 class CameraConfig(ArkosBaseModel):
@@ -126,6 +127,7 @@ class CameraConfig(ArkosBaseModel):
     review: "ReviewConfig" = Field(default_factory=lambda: ReviewConfig(), title="Review configuration")
     birdseye: "BirdseyeConfig" = Field(default_factory=lambda: BirdseyeConfig(), title="Birdseye configuration")
     genai: "GenAIConfig" = Field(default_factory=lambda: GenAIConfig(), title="Generative AI configuration")
+    events: EventConfig = Field(default_factory=EventConfig, title="Event configuration")
     face_recognition: "FaceRecognitionConfig" = Field(default_factory=lambda: FaceRecognitionConfig(), title="Face recognition configuration")
     lpr: "LicensePlateRecognitionConfig" = Field(default_factory=lambda: LicensePlateRecognitionConfig(), title="License plate recognition configuration")
     
