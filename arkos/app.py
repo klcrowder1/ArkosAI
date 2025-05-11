@@ -68,7 +68,7 @@ from arkos.record.record import manage_recordings
 from arkos.review.review import manage_review_segments
 from arkos.stats.emitter import StatsEmitter
 from arkos.stats.util import stats_init
-from arkos.storage import StorageMaintainer, TieredStorageManager
+from arkos.storage import StorageMaintainer, TieredStorageManager, StorageMonitor
 # Import TimelineProcessor from events module instead of the old one
 from arkos.track.object_processing import TrackedObjectProcessor
 from arkos.util.builtin import empty_and_close_queue
@@ -555,6 +555,24 @@ class ArkosApp:
             )
             self.tiered_storage_manager.start()
             logger.info("Tiered storage manager started")
+            
+            # Start storage monitor with tiered storage manager
+            self.storage_monitor = StorageMonitor(
+                self.config,
+                self.stop_event,
+                self.tiered_storage_manager,
+                notification_manager=self.dispatcher if hasattr(self, 'dispatcher') else None
+            )
+        else:
+            # Start storage monitor without tiered storage manager
+            self.storage_monitor = StorageMonitor(
+                self.config,
+                self.stop_event,
+                notification_manager=self.dispatcher if hasattr(self, 'dispatcher') else None
+            )
+            
+        self.storage_monitor.start()
+        logger.info("Storage monitor started")
 
     def start_stats_emitter(self) -> None:
         self.stats_emitter = StatsEmitter(
@@ -706,6 +724,7 @@ class ArkosApp:
                 self.onvif_controller,
                 self.stats_emitter,
                 self.event_metadata_updater,
+                storage_monitor=self.storage_monitor,
             )
             
             # Register camera connection API endpoints
@@ -716,6 +735,11 @@ class ArkosApp:
             if hasattr(self, 'health_manager'):
                 from arkos.health.integration import register_health_api
                 register_health_api(app, self.health_manager)
+                
+            # Register storage API endpoints
+            if hasattr(self, 'storage_monitor'):
+                from arkos.storage.integration import register_storage_api
+                register_storage_api(app, self.storage_monitor)
                 
             uvicorn.run(
                 app,
@@ -807,7 +831,10 @@ class ArkosApp:
         self.stats_emitter.join()
         self.arkos_watchdog.join()
         
-        # Stop tiered storage manager if it was started
+        # Stop storage monitor and tiered storage manager if they were started
+        if hasattr(self, 'storage_monitor'):
+            self.storage_monitor.join()
+            
         if hasattr(self, 'tiered_storage_manager'):
             self.tiered_storage_manager.join()
             
