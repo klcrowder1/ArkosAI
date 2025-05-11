@@ -1,6 +1,92 @@
 mqtt:
   host: mqtt
 
+# Detector configuration with multi-model support
+detectors:
+  cpu:
+    type: cpu
+    num_threads: 3
+    # Multiple models configuration
+    models:
+      # General purpose model (default)
+      - path: /models/yolov7-320.pt
+        width: 320
+        height: 320
+        model_type: yologeneric
+        purpose: general
+        priority: 100
+      
+      # Person-specific model (higher resolution, specialized for people detection)
+      - path: /models/person-model-640.pt
+        width: 640
+        height: 640
+        model_type: yologeneric
+        purpose: person
+        priority: 50
+      
+      # Vehicle-specific model
+      - path: /models/vehicle-model-512.pt
+        width: 512
+        height: 512
+        model_type: yologeneric
+        purpose: vehicle
+        priority: 50
+      
+      # License plate recognition model
+      - path: /models/license-plate-model-416.pt
+        width: 416
+        height: 416
+        model_type: yologeneric
+        purpose: license_plate
+        priority: 30
+  
+  # Custom model detector configuration
+  custom:
+    type: custom
+    num_threads: 4
+    model_format: "onnx"  # Options: tflite, onnx, pytorch
+    # Custom preprocessing configuration
+    custom_preprocessing:
+      mean: [0.485, 0.456, 0.406]  # RGB mean values for normalization
+      std: [0.229, 0.224, 0.225]   # RGB standard deviation values for normalization
+      transforms:
+        - rgb_to_bgr                # Convert RGB to BGR if needed
+        - hwc_to_chw                # Convert HWC to CHW if needed
+    # Models configuration
+    models:
+      # Custom general purpose model
+      - path: /models/custom/my-custom-model.onnx
+        width: 640
+        height: 640
+        model_type: yologeneric
+        purpose: general
+        priority: 100
+        input_tensor: nchw         # Input tensor format (nchw or nhwc)
+        input_pixel_format: rgb    # Input pixel format (rgb or bgr)
+        input_dtype: float         # Input data type (float, float_denorm, or int)
+        # Custom label mapping
+        labelmap:
+          0: person
+          1: car
+          2: truck
+          3: bicycle
+          4: motorcycle
+          5: bus
+      
+      # Custom specialized model for face detection
+      - path: /models/custom/face-detection.onnx
+        width: 320
+        height: 320
+        model_type: ssd
+        purpose: face
+        priority: 50
+        input_tensor: nhwc
+        input_pixel_format: rgb
+        input_dtype: float
+        # Custom label mapping
+        labelmap:
+          0: face
+
 cameras:
   test:
     ffmpeg:
@@ -14,3 +100,9 @@ cameras:
       height: 1080
       width: 1920
       fps: 5
+      # Configure which model purposes to use for this camera
+      # If not specified, the general purpose model will be used
+      model_purposes:
+        - general
+        - vehicle
+        - license_plate
