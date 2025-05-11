@@ -144,6 +144,12 @@ class TimelineProcessor(threading.Thread):
                     current_event.region,
                 ),
                 "attribute": "",
+                "category": current_event.category,
+                "confidence": current_event.confidence,
+                "tags": current_event.tags,
+                "description": current_event.description,
+                "source": current_event.source,
+                "detection_time": current_event.data.get("detection_time"),
             },
         }
 
@@ -223,6 +229,16 @@ class TimelineProcessor(threading.Thread):
                 Timeline.data: {
                     "label": event_data["label"],
                     "sub_label": event_data.get("sub_label"),
+                    "dBFS": event_data.get("dBFS", 0),
+                    "category": event_data.get("category"),
+                    "confidence": event_data.get("confidence"),
+                    "tags": event_data.get("tags"),
+                    "description": event_data.get("description"),
+                    "source": event_data.get("source", "arkos"),
+                    "detection_time": event_data.get("detection_time"),
+                    "audio_type": event_data.get("audio_type"),
+                    "frequency_range": event_data.get("frequency_range"),
+                    "audio_source": event_data.get("audio_source", "microphone"),
                 },
             }
         else:
@@ -235,6 +251,16 @@ class TimelineProcessor(threading.Thread):
                 Timeline.data: {
                     "label": event_data["label"],
                     "sub_label": event_data.get("sub_label"),
+                    "category": event_data.get("category"),
+                    "confidence": event_data.get("confidence"),
+                    "tags": event_data.get("tags"),
+                    "description": event_data.get("description"),
+                    "source": event_data.get("source", "arkos"),
+                    "detection_time": event_data.get("detection_time"),
+                    "api_source": event_data.get("api_source", "external"),
+                    "user_id": event_data.get("user_id"),
+                    "request_id": event_data.get("request_id"),
+                    "trigger_type": event_data.get("trigger_type", "manual"),
                 },
             }
 
@@ -270,6 +296,15 @@ class TimelineProcessor(threading.Thread):
                 "label": event_data["label"],
                 "sub_label": event_data.get("sub_label"),
                 "dBFS": event_data.get("dBFS", 0),
+                "category": event_data.get("category"),
+                "confidence": event_data.get("confidence"),
+                "tags": event_data.get("tags"),
+                "description": event_data.get("description"),
+                "source": event_data.get("source", "arkos"),
+                "detection_time": event_data.get("detection_time"),
+                "audio_type": event_data.get("audio_type"),
+                "frequency_range": event_data.get("frequency_range"),
+                "audio_source": event_data.get("audio_source", "microphone"),
             },
         }
 

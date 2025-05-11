@@ -2,11 +2,12 @@
 
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
+import datetime
 
 
 class EventTypeEnum(str, Enum):
     """Types of events that can be detected."""
-    
+
     TRACKED_OBJECT = "tracked_object"
     AUDIO = "audio"
     API = "api"
@@ -16,7 +17,7 @@ class EventTypeEnum(str, Enum):
 
 class EventStateEnum(str, Enum):
     """States that an event can be in."""
-    
+
     START = "start"
     UPDATE = "update"
     END = "end"
@@ -24,22 +25,40 @@ class EventStateEnum(str, Enum):
 
 class EventSeverityEnum(str, Enum):
     """Severity levels for events."""
-    
+
     ALERT = "alert"
     DETECTION = "detection"
     INFO = "info"
 
 
+class EventCategoryEnum(str, Enum):
+    """Categories for events."""
+
+    SECURITY = "security"
+    MONITORING = "monitoring"
+    ANALYTICS = "analytics"
+    SYSTEM = "system"
+    CUSTOM = "custom"
+
+
+class EventConfidenceEnum(str, Enum):
+    """Confidence levels for events."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
 class RegenerateDescriptionEnum(str, Enum):
     """Types of regeneration for event descriptions."""
-    
+
     THUMBNAILS = "thumbnails"
     SNAPSHOT = "snapshot"
 
 
 class EventData:
     """Base class for event data."""
-    
+
     def __init__(
         self,
         id: str,
@@ -54,6 +73,14 @@ class EventData:
         severity: Optional[str] = None,
         zones: List[str] = None,
         data: Dict[str, Any] = None,
+        category: Optional[str] = None,
+        confidence: Optional[str] = None,
+        tags: List[str] = None,
+        description: Optional[str] = None,
+        source: Optional[str] = None,
+        related_events: List[str] = None,
+        retention_days: Optional[int] = None,
+        metadata: Dict[str, Any] = None,
     ):
         self.id = id
         self.camera = camera
@@ -67,7 +94,19 @@ class EventData:
         self.severity = severity
         self.zones = zones or []
         self.data = data or {}
-    
+        self.category = category
+        self.confidence = confidence
+        self.tags = tags or []
+        self.description = description
+        self.source = source or "arkos"
+        self.related_events = related_events or []
+        self.retention_days = retention_days
+        self.metadata = metadata or {}
+
+        # Add creation timestamp to metadata
+        if "created_at" not in self.metadata:
+            self.metadata["created_at"] = datetime.datetime.now().isoformat()
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event data to dictionary."""
         return {
@@ -83,8 +122,16 @@ class EventData:
             "severity": self.severity,
             "zones": self.zones,
             "data": self.data,
+            "category": self.category,
+            "confidence": self.confidence,
+            "tags": self.tags,
+            "description": self.description,
+            "source": self.source,
+            "related_events": self.related_events,
+            "retention_days": self.retention_days,
+            "metadata": self.metadata,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'EventData':
         """Create event data from dictionary."""
@@ -101,12 +148,34 @@ class EventData:
             severity=data.get("severity"),
             zones=data.get("zones", []),
             data=data.get("data", {}),
+            category=data.get("category"),
+            confidence=data.get("confidence"),
+            tags=data.get("tags", []),
+            description=data.get("description"),
+            source=data.get("source", "arkos"),
+            related_events=data.get("related_events", []),
+            retention_days=data.get("retention_days"),
+            metadata=data.get("metadata", {}),
         )
+
+    def add_tag(self, tag: str) -> None:
+        """Add a tag to the event."""
+        if tag not in self.tags:
+            self.tags.append(tag)
+
+    def add_related_event(self, event_id: str) -> None:
+        """Add a related event to the event."""
+        if event_id not in self.related_events:
+            self.related_events.append(event_id)
+
+    def update_metadata(self, key: str, value: Any) -> None:
+        """Update metadata for the event."""
+        self.metadata[key] = value
 
 
 class TrackedObjectEventData(EventData):
     """Event data for tracked objects."""
-    
+
     def __init__(
         self,
         id: str,
@@ -152,7 +221,7 @@ class TrackedObjectEventData(EventData):
             zones=entered_zones or [],
             data=kwargs.get("data", {}),
         )
-        
+
         self.box = box
         self.area = area
         self.region = region
@@ -170,7 +239,7 @@ class TrackedObjectEventData(EventData):
         self.velocity_angle = velocity_angle
         self.path_data = path_data or []
         self.recognized_license_plate = recognized_license_plate
-        
+
         # Update data dictionary with object-specific fields
         self.data.update({
             "box": box,
@@ -182,12 +251,14 @@ class TrackedObjectEventData(EventData):
             "velocity_angle": velocity_angle,
             "type": "object",
             "path_data": path_data or [],
+            "detection_time": datetime.datetime.fromtimestamp(start_time).isoformat(),
+            "duration": 0 if end_time is None else end_time - start_time,
         })
-        
+
         if recognized_license_plate:
             self.data["recognized_license_plate"] = recognized_license_plate[0]
             self.data["recognized_license_plate_score"] = recognized_license_plate[1]
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert tracked object event data to dictionary."""
         result = super().to_dict()
@@ -211,7 +282,7 @@ class TrackedObjectEventData(EventData):
             "recognized_license_plate": self.recognized_license_plate,
         })
         return result
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'TrackedObjectEventData':
         """Create tracked object event data from dictionary."""
@@ -249,7 +320,7 @@ class TrackedObjectEventData(EventData):
 
 class AudioEventData(EventData):
     """Event data for audio events."""
-    
+
     def __init__(
         self,
         id: str,
@@ -279,18 +350,23 @@ class AudioEventData(EventData):
             severity=severity,
             data=kwargs.get("data", {}),
         )
-        
+
         self.score = score
         self.dBFS = dBFS
-        
+
         # Update data dictionary with audio-specific fields
         self.data.update({
             "type": "audio",
             "score": score,
             "top_score": score,
             "dBFS": dBFS,
+            "detection_time": datetime.datetime.fromtimestamp(start_time).isoformat(),
+            "duration": 0 if end_time is None else end_time - start_time,
+            "audio_type": label,
+            "frequency_range": kwargs.get("frequency_range"),
+            "audio_source": kwargs.get("audio_source", "microphone"),
         })
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert audio event data to dictionary."""
         result = super().to_dict()
@@ -299,7 +375,7 @@ class AudioEventData(EventData):
             "dBFS": self.dBFS,
         })
         return result
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'AudioEventData':
         """Create audio event data from dictionary."""
@@ -322,7 +398,7 @@ class AudioEventData(EventData):
 
 class ApiEventData(EventData):
     """Event data for API-triggered events."""
-    
+
     def __init__(
         self,
         id: str,
@@ -352,17 +428,23 @@ class ApiEventData(EventData):
             severity=severity,
             data=kwargs.get("data", {}),
         )
-        
+
         self.score = score
         self.event_type = event_type
-        
+
         # Update data dictionary with API-specific fields
         self.data.update({
             "type": event_type,
             "score": score,
             "top_score": score,
+            "detection_time": datetime.datetime.fromtimestamp(start_time).isoformat(),
+            "duration": 0 if end_time is None else end_time - start_time,
+            "api_source": kwargs.get("api_source", "external"),
+            "user_id": kwargs.get("user_id"),
+            "request_id": kwargs.get("request_id"),
+            "trigger_type": kwargs.get("trigger_type", "manual"),
         })
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert API event data to dictionary."""
         result = super().to_dict()
@@ -371,7 +453,7 @@ class ApiEventData(EventData):
             "event_type": self.event_type,
         })
         return result
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ApiEventData':
         """Create API event data from dictionary."""

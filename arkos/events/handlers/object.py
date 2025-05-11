@@ -221,6 +221,16 @@ class TrackedObjectHandler(EventHandler):
                 "type": "object",
                 "max_severity": event.severity,
                 "path_data": event.data.get("path_data"),
+                "detection_time": event.data.get("detection_time"),
+                "duration": event.data.get("duration"),
+                "category": event.category,
+                "confidence": event.confidence,
+                "tags": event.tags,
+                "description": event.description,
+                "source": event.source,
+                "related_events": event.related_events,
+                "retention_days": event.retention_days,
+                "metadata": event.metadata,
             },
         }
 
