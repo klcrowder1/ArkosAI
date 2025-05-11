@@ -360,6 +360,18 @@ class ArkosApp:
         self.camera_connection_manager = init_camera_connection_manager(
             self.config, self.camera_metrics
         )
+        
+    def init_health_manager(self) -> None:
+        """Initialize the health manager."""
+        if not self.camera_connection_manager:
+            logger.warning("Camera connection manager not initialized, skipping health manager initialization")
+            return
+            
+        from arkos.health.integration import init_health_manager
+        
+        self.health_manager = init_health_manager(
+            self.config, self.camera_connection_manager, self.camera_metrics
+        )
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -669,6 +681,7 @@ class ArkosApp:
         self.start_record_cleanup()
         self.start_watchdog()
         self.init_camera_connection_manager()
+        self.init_health_manager()
 
         self.init_auth()
 
@@ -687,6 +700,11 @@ class ArkosApp:
             # Register camera connection API endpoints
             if self.camera_connection_manager:
                 register_camera_connection_api(app, self.camera_connection_manager)
+                
+            # Register health API endpoints
+            if hasattr(self, 'health_manager'):
+                from arkos.health.integration import register_health_api
+                register_health_api(app, self.health_manager)
                 
             uvicorn.run(
                 app,
@@ -713,6 +731,10 @@ class ArkosApp:
         # stop the camera connection manager
         if self.camera_connection_manager:
             self.camera_connection_manager.stop()
+            
+        # stop the health manager
+        if hasattr(self, 'health_manager'):
+            self.health_manager.stop()
 
         # stop the audio process
         if self.audio_process:

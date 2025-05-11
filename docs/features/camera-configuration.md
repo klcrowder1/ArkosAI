@@ -40,6 +40,11 @@ Arkos AI supports different camera types, each optimized for specific use cases:
 - **lpr**: Optimized for license plate recognition
 - **face**: Optimized for face detection and recognition
 - **specialized**: Custom configuration for specialized use cases
+- **ptz**: Pan-Tilt-Zoom cameras with movement capabilities
+- **thermal**: Thermal imaging cameras for temperature detection
+- **fisheye**: Fisheye cameras with dewarping capabilities
+- **multi_sensor**: Multi-sensor cameras with multiple image sensors
+- **doorbell**: Doorbell cameras with button detection and two-way audio
 
 Example:
 
@@ -48,6 +53,176 @@ cameras:
   front_gate:
     type: lpr
     # LPR-specific configuration
+```
+
+### PTZ Camera Configuration
+
+PTZ (Pan-Tilt-Zoom) cameras provide movement capabilities for dynamic monitoring:
+
+```yaml
+cameras:
+  ptz_camera:
+    type: ptz
+    ptz:
+      enabled: true
+      protocol: onvif
+      default_speed: 0.5
+      presets:
+        home:
+          name: Home
+          position:
+            pan: 0.0
+            tilt: 0.0
+            zoom: 1.0
+          home: true
+        entrance:
+          name: Entrance
+          position:
+            pan: 45.0
+            tilt: -10.0
+            zoom: 2.0
+      patrols:
+        perimeter:
+          name: Perimeter Patrol
+          presets:
+            - home
+            - entrance
+            - back
+            - side
+          dwell_time: 10
+          speed: 0.8
+      autotracking:
+        enabled: true
+        tracking_objects:
+          - person
+        tracking_timeout: 30
+```
+
+### Thermal Camera Configuration
+
+Thermal cameras detect heat signatures and can measure temperatures:
+
+```yaml
+cameras:
+  thermal_camera:
+    type: thermal
+    thermal:
+      enabled: true
+      unit: celsius
+      min_temp: 0.0
+      max_temp: 100.0
+      palette: iron
+      show_temp: true
+      show_hotspot: true
+      alarms:
+        high_temp:
+          enabled: true
+          threshold_high: 38.0
+          duration: 5
+          zones:
+            - entrance
+```
+
+### Fisheye Camera Configuration
+
+Fisheye cameras provide wide-angle views that can be dewarped:
+
+```yaml
+cameras:
+  fisheye_camera:
+    type: fisheye
+    fisheye:
+      enabled: true
+      dewarper:
+        enabled: true
+        method: opencv
+        center: [0.5, 0.5]
+        radius: 1.0
+        fov: 180.0
+      panorama: true
+      panorama_width: 1920
+      panorama_height: 480
+      views:
+        north:
+          name: North View
+          pan: 0.0
+          tilt: 0.0
+          zoom: 1.0
+        east:
+          name: East View
+          pan: 90.0
+          tilt: 0.0
+          zoom: 1.0
+```
+
+### Multi-Sensor Camera Configuration
+
+Multi-sensor cameras have multiple image sensors in a single housing:
+
+```yaml
+cameras:
+  multi_sensor_camera:
+    type: multi_sensor
+    multi_sensor:
+      enabled: true
+      sensors:
+        front:
+          name: Front Sensor
+          stream_url: rtsp://username:password@camera-ip:554/stream1
+          position: front
+        left:
+          name: Left Sensor
+          stream_url: rtsp://username:password@camera-ip:554/stream2
+          position: left
+        right:
+          name: Right Sensor
+          stream_url: rtsp://username:password@camera-ip:554/stream3
+          position: right
+      groups:
+        perimeter:
+          name: Perimeter Group
+          sensors:
+            - front
+            - left
+            - right
+          stitching: true
+          stitching_width: 2560
+          stitching_height: 720
+```
+
+### Doorbell Camera Configuration
+
+Doorbell cameras include button detection and two-way audio:
+
+```yaml
+cameras:
+  doorbell_camera:
+    type: doorbell
+    doorbell:
+      enabled: true
+      button_enabled: true
+      button_detection_method: api
+      audio_enabled: true
+      two_way_audio: true
+      events:
+        button_press:
+          name: Button Press
+          trigger_type: button
+          notify: true
+          notification_title: Doorbell
+          notification_message: Someone is at the door
+        person_detected:
+          name: Person Detected
+          trigger_type: object
+          trigger_objects:
+            - person
+          notify: true
+      responses:
+        welcome:
+          name: Welcome Message
+          trigger_events:
+            - button_press
+          audio_text: Hello, I'll be right there
 ```
 
 ## FFmpeg Configuration

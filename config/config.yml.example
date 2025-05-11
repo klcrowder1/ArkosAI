@@ -88,6 +88,7 @@ detectors:
           0: face
 
 cameras:
+  # Standard camera example
   test:
     ffmpeg:
       inputs:
@@ -106,3 +107,135 @@ cameras:
         - general
         - vehicle
         - license_plate
+  
+  # PTZ camera example
+  ptz_camera:
+    type: ptz
+    ffmpeg:
+      inputs:
+        - path: rtsp://username:password@camera-ip:554/stream
+          roles:
+            - detect
+            - record
+    ptz:
+      enabled: true
+      protocol: onvif
+      default_speed: 0.5
+      presets:
+        home:
+          name: Home
+          position:
+            pan: 0.0
+            tilt: 0.0
+            zoom: 1.0
+          home: true
+        entrance:
+          name: Entrance
+          position:
+            pan: 45.0
+            tilt: -10.0
+            zoom: 2.0
+      autotracking:
+        enabled: true
+        tracking_objects:
+          - person
+        tracking_timeout: 30
+  
+  # Thermal camera example
+  thermal_camera:
+    type: thermal
+    ffmpeg:
+      inputs:
+        - path: rtsp://username:password@thermal-camera-ip:554/stream
+          roles:
+            - detect
+            - record
+    thermal:
+      enabled: true
+      unit: celsius
+      min_temp: 0.0
+      max_temp: 100.0
+      palette: iron
+      show_temp: true
+      show_hotspot: true
+      alarms:
+        high_temp:
+          enabled: true
+          threshold_high: 38.0
+          duration: 5
+  
+  # Fisheye camera example
+  fisheye_camera:
+    type: fisheye
+    ffmpeg:
+      inputs:
+        - path: rtsp://username:password@fisheye-camera-ip:554/stream
+          roles:
+            - detect
+            - record
+    fisheye:
+      enabled: true
+      dewarper:
+        enabled: true
+        method: opencv
+        center: [0.5, 0.5]
+        radius: 1.0
+        fov: 180.0
+      panorama: true
+      panorama_width: 1920
+      panorama_height: 480
+  
+  # Multi-sensor camera example
+  multi_sensor_camera:
+    type: multi_sensor
+    multi_sensor:
+      enabled: true
+      sensors:
+        front:
+          name: Front Sensor
+          stream_url: rtsp://username:password@camera-ip:554/stream1
+          position: front
+        left:
+          name: Left Sensor
+          stream_url: rtsp://username:password@camera-ip:554/stream2
+          position: left
+        right:
+          name: Right Sensor
+          stream_url: rtsp://username:password@camera-ip:554/stream3
+          position: right
+      groups:
+        perimeter:
+          name: Perimeter Group
+          sensors:
+            - front
+            - left
+            - right
+          stitching: true
+  
+  # Doorbell camera example
+  doorbell_camera:
+    type: doorbell
+    ffmpeg:
+      inputs:
+        - path: rtsp://username:password@doorbell-camera-ip:554/stream
+          roles:
+            - detect
+            - record
+            - audio
+    doorbell:
+      enabled: true
+      button_enabled: true
+      button_detection_method: api
+      audio_enabled: true
+      two_way_audio: true
+      events:
+        button_press:
+          name: Button Press
+          trigger_type: button
+          notify: true
+        person_detected:
+          name: Person Detected
+          trigger_type: object
+          trigger_objects:
+            - person
+          notify: true

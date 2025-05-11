@@ -12,6 +12,7 @@ from requests.exceptions import RequestException
 from arkos.camera import CameraMetrics, ConnectionError, ConnectionStatus
 from arkos.comms.config_updater import ConfigPublisher
 from arkos.config import CameraConfig
+from arkos.config.camera import CameraTypeEnum
 from arkos.log import LogPipe
 
 logger = logging.getLogger(__name__)
@@ -239,74 +240,97 @@ class CameraConnectionManager:
         Returns:
             ConnectionError: Type of connection error, or NONE if camera is reachable
         """
-        # Check each input
-        for input_config in camera_config.ffmpeg.inputs:
-            path = input_config.path
-            
-            # Skip file inputs
-            if path.startswith("/") or path.startswith("file:"):
-                continue
+        # Handle different camera types
+        if camera_config.type == CameraTypeEnum.MULTI_SENSOR:
+            # For multi-sensor cameras, check each sensor
+            for sensor_name, sensor_config in camera_config.multi_sensor.sensors.items():
+                error = self._check_stream_reachable(sensor_config.stream_url)
+                if error != ConnectionError.NONE:
+                    return error
+            return ConnectionError.NONE
+        else:
+            # For other camera types, check each input
+            for input_config in camera_config.ffmpeg.inputs:
+                path = input_config.path
                 
-            # Parse URL
-            protocol = None
-            host = None
-            port = None
-            
-            if path.startswith("rtsp://"):
-                protocol = "rtsp"
-                url_parts = path[7:].split("/")[0].split("@")[-1].split(":")
-                host = url_parts[0]
-                port = int(url_parts[1]) if len(url_parts) > 1 else 554
-            elif path.startswith("http://"):
-                protocol = "http"
-                url_parts = path[7:].split("/")[0].split(":")
-                host = url_parts[0]
-                port = int(url_parts[1]) if len(url_parts) > 1 else 80
-            elif path.startswith("https://"):
-                protocol = "https"
-                url_parts = path[8:].split("/")[0].split(":")
-                host = url_parts[0]
-                port = int(url_parts[1]) if len(url_parts) > 1 else 443
-            
-            if not host:
-                continue
-                
-            # Check if host is reachable
-            try:
-                # First try a simple socket connection
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(2)
-                result = sock.connect_ex((host, port))
-                sock.close()
-                
-                if result != 0:
-                    return ConnectionError.NETWORK
+                # Skip file inputs
+                if path.startswith("/") or path.startswith("file:"):
+                    continue
                     
-                # For HTTP/HTTPS, try a request
-                if protocol in ["http", "https"]:
-                    try:
-                        response = requests.head(path, timeout=5)
-                        if response.status_code == 401:
-                            return ConnectionError.AUTHENTICATION
-                        elif response.status_code >= 400:
-                            return ConnectionError.UNKNOWN
-                    except RequestException:
-                        # Socket connection worked but HTTP request failed
-                        # This could be due to authentication or other issues
-                        pass
-                        
-                # If we get here, the camera is reachable
-                return ConnectionError.NONE
-                
-            except socket.gaierror:
-                return ConnectionError.NETWORK
-            except socket.timeout:
-                return ConnectionError.TIMEOUT
-            except Exception:
-                return ConnectionError.UNKNOWN
-                
+                error = self._check_stream_reachable(path)
+                if error != ConnectionError.NONE:
+                    return error
+                    
         # If we get here, we couldn't determine if the camera is reachable
         return ConnectionError.NONE
+        
+    def _check_stream_reachable(self, path: str) -> ConnectionError:
+        """
+        Check if a stream is reachable.
+        
+        Args:
+            path: Stream path
+            
+        Returns:
+            ConnectionError: Type of connection error, or NONE if stream is reachable
+        """
+        # Parse URL
+        protocol = None
+        host = None
+        port = None
+        
+        if path.startswith("rtsp://"):
+            protocol = "rtsp"
+            url_parts = path[7:].split("/")[0].split("@")[-1].split(":")
+            host = url_parts[0]
+            port = int(url_parts[1]) if len(url_parts) > 1 else 554
+        elif path.startswith("http://"):
+            protocol = "http"
+            url_parts = path[7:].split("/")[0].split(":")
+            host = url_parts[0]
+            port = int(url_parts[1]) if len(url_parts) > 1 else 80
+        elif path.startswith("https://"):
+            protocol = "https"
+            url_parts = path[8:].split("/")[0].split(":")
+            host = url_parts[0]
+            port = int(url_parts[1]) if len(url_parts) > 1 else 443
+        
+        if not host:
+            return ConnectionError.NONE
+            
+        # Check if host is reachable
+        try:
+            # First try a simple socket connection
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(2)
+            result = sock.connect_ex((host, port))
+            sock.close()
+            
+            if result != 0:
+                return ConnectionError.NETWORK
+                
+            # For HTTP/HTTPS, try a request
+            if protocol in ["http", "https"]:
+                try:
+                    response = requests.head(path, timeout=5)
+                    if response.status_code == 401:
+                        return ConnectionError.AUTHENTICATION
+                    elif response.status_code >= 400:
+                        return ConnectionError.UNKNOWN
+                except RequestException:
+                    # Socket connection worked but HTTP request failed
+                    # This could be due to authentication or other issues
+                    pass
+                    
+            # If we get here, the stream is reachable
+            return ConnectionError.NONE
+            
+        except socket.gaierror:
+            return ConnectionError.NETWORK
+        except socket.timeout:
+            return ConnectionError.TIMEOUT
+        except Exception:
+            return ConnectionError.UNKNOWN
 
     def get_connection_status(self, camera_name: str) -> Tuple[str, str]:
         """

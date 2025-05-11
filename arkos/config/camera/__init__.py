@@ -29,6 +29,11 @@ class CameraTypeEnum(str, Enum):
     LPR = "lpr"
     FACE = "face"
     SPECIALIZED = "specialized"
+    PTZ = "ptz"
+    THERMAL = "thermal"
+    FISHEYE = "fisheye"
+    MULTI_SENSOR = "multi_sensor"
+    DOORBELL = "doorbell"
 
 
 class CameraLiveConfig(ArkosBaseModel):
@@ -89,6 +94,14 @@ class OnvifAutotrackingConfig(ArkosBaseModel):
     cooldown: int = Field(default=30, title="Cooldown period in seconds")
 
 
+# Import new camera type configurations
+from arkos.config.camera.ptz import PTZConfig
+from arkos.config.camera.thermal import ThermalConfig
+from arkos.config.camera.fisheye import FisheyeConfig
+from arkos.config.camera.multi_sensor import MultiSensorConfig
+from arkos.config.camera.doorbell import DoorbellConfig
+
+
 class CameraConfig(ArkosBaseModel):
     """Camera configuration."""
 
@@ -115,6 +128,13 @@ class CameraConfig(ArkosBaseModel):
     genai: "GenAIConfig" = Field(default_factory=lambda: GenAIConfig(), title="Generative AI configuration")
     face_recognition: "FaceRecognitionConfig" = Field(default_factory=lambda: FaceRecognitionConfig(), title="Face recognition configuration")
     lpr: "LicensePlateRecognitionConfig" = Field(default_factory=lambda: LicensePlateRecognitionConfig(), title="License plate recognition configuration")
+    
+    # New camera type configurations
+    ptz: PTZConfig = Field(default_factory=PTZConfig, title="PTZ camera configuration")
+    thermal: ThermalConfig = Field(default_factory=ThermalConfig, title="Thermal camera configuration")
+    fisheye: FisheyeConfig = Field(default_factory=FisheyeConfig, title="Fisheye camera configuration")
+    multi_sensor: MultiSensorConfig = Field(default_factory=MultiSensorConfig, title="Multi-sensor camera configuration")
+    doorbell: DoorbellConfig = Field(default_factory=DoorbellConfig, title="Doorbell camera configuration")
     
     # Advanced configuration options
     rtmp: Dict[str, Any] = Field(default_factory=dict, title="RTMP configuration")

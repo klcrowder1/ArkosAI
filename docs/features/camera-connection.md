@@ -124,6 +124,50 @@ The Arkos AI web interface provides a visual representation of camera connection
 
 The interface also provides detailed information about connection errors and allows you to reset connections with a single click.
 
+## Camera Type-Specific Connection Management
+
+Arkos AI provides specialized connection management for different camera types:
+
+### PTZ Cameras
+
+PTZ cameras have additional connection requirements:
+
+- **ONVIF Connection**: PTZ cameras often use ONVIF for control
+- **Movement Control**: Verify that movement commands are being received
+- **Preset Positions**: Test preset positions to ensure they work correctly
+
+### Thermal Cameras
+
+Thermal cameras may have specific connection requirements:
+
+- **Temperature Data**: Verify that temperature data is being received
+- **Calibration**: Some thermal cameras require calibration after connection
+- **Special Protocols**: Some thermal cameras use proprietary protocols
+
+### Fisheye Cameras
+
+Fisheye cameras have unique connection considerations:
+
+- **Dewarping Parameters**: Verify that dewarping parameters are correct
+- **View Configuration**: Test different views to ensure they are properly configured
+- **Panorama Mode**: If using panorama mode, verify that it's working correctly
+
+### Multi-Sensor Cameras
+
+Multi-sensor cameras require special handling:
+
+- **Multiple Streams**: Verify that all sensor streams are accessible
+- **Synchronization**: Check that sensors are properly synchronized
+- **Stitching**: If using image stitching, verify that it's working correctly
+
+### Doorbell Cameras
+
+Doorbell cameras have additional connection requirements:
+
+- **Button Detection**: Verify that button presses are being detected
+- **Two-Way Audio**: Test two-way audio functionality
+- **Integration**: Check integration with notification systems
+
 ## Troubleshooting
 
 If you're experiencing connection issues with your cameras:
@@ -148,6 +192,13 @@ If you're experiencing connection issues with your cameras:
 5. **Reset the connection**:
    - Use the API or web interface to reset the connection
    - Monitor the logs during the reconnection attempt
+
+6. **Camera-specific troubleshooting**:
+   - For PTZ cameras, check ONVIF connectivity and movement control
+   - For thermal cameras, verify temperature data and calibration
+   - For fisheye cameras, check dewarping parameters and view configuration
+   - For multi-sensor cameras, verify all sensor streams and synchronization
+   - For doorbell cameras, test button detection and two-way audio
 
 ## Best Practices
 
