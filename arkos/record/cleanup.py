@@ -121,7 +121,6 @@ class RecordingCleanup(threading.Thread):
         )
 
         # loop over recordings and see if they overlap with any non-expired reviews
-        # TODO: expire segments based on segment stats according to config
         review_start = 0
         deleted_recordings = set()
         kept_recordings: list[tuple[float, float]] = []
@@ -129,7 +128,38 @@ class RecordingCleanup(threading.Thread):
         for recording in recordings:
             keep = False
             mode = None
-            # Now look for a reason to keep this recording segment
+            priority = None
+            
+            # Check if recording falls within any time-based retention policies
+            recording_time = datetime.datetime.fromtimestamp(recording.start_time)
+            recording_hour = recording_time.hour
+            recording_minute = recording_time.minute
+            recording_day = recording_time.strftime("%A").lower()
+            
+            # Check global time ranges
+            time_range_match = False
+            if hasattr(config.record.retain, "time_ranges") and config.record.retain.time_ranges:
+                for time_range in config.record.retain.time_ranges:
+                    start_hour, start_minute = map(int, time_range.start_time.split(":"))
+                    end_hour, end_minute = map(int, time_range.end_time.split(":"))
+                    
+                    start_minutes = start_hour * 60 + start_minute
+                    end_minutes = end_hour * 60 + end_minute
+                    recording_minutes = recording_hour * 60 + recording_minute
+                    
+                    if (recording_day in time_range.days and 
+                        start_minutes <= recording_minutes <= end_minutes):
+                        time_range_match = True
+                        break
+                
+                # If no time range matches and there are time ranges defined, this recording
+                # is outside the retention time ranges and should be deleted
+                if not time_range_match:
+                    Path(recording.path).unlink(missing_ok=True)
+                    deleted_recordings.add(recording.id)
+                    continue
+            
+            # Now look for a reason to keep this recording segment based on reviews
             for idx in range(review_start, len(reviews)):
                 review: ReviewSegment = reviews[idx]
                 severity = review.severity
@@ -149,11 +179,12 @@ class RecordingCleanup(threading.Thread):
                     or review.end_time + post_capture >= recording.start_time
                 ):
                     keep = True
-                    mode = (
-                        config.record.alerts.retain.mode
-                        if review.severity == "alert"
-                        else config.record.detections.retain.mode
-                    )
+                    if review.severity == "alert":
+                        mode = config.record.alerts.retain.mode
+                        priority = getattr(config.record.alerts.retain, "priority", "medium")
+                    else:
+                        mode = config.record.detections.retain.mode
+                        priority = getattr(config.record.detections.retain, "priority", "medium")
                     break
 
                 # if the review ends before this recording segment starts, skip
@@ -162,6 +193,28 @@ class RecordingCleanup(threading.Thread):
                 # that end before the previous recording segment started on future segments
                 if review.end_time + post_capture < recording.start_time:
                     review_start = idx
+            
+            # Check object-specific retention policies if available
+            if (hasattr(config.record.retain, "objects") and config.record.retain.objects and 
+                hasattr(review, "data") and review.data and "label" in review.data):
+                object_label = review.data["label"]
+                if object_label in config.record.retain.objects:
+                    object_config = config.record.retain.objects[object_label]
+                    # Override with object-specific retention settings if they exist
+                    if keep:
+                        mode = object_config.mode
+                        priority = object_config.priority
+            
+            # Check zone-specific retention policies if available
+            if (hasattr(config.record.retain, "zones") and config.record.retain.zones and 
+                hasattr(review, "data") and review.data and "zones" in review.data):
+                for zone in review.data["zones"]:
+                    if zone in config.record.retain.zones:
+                        zone_config = config.record.retain.zones[zone]
+                        # Override with zone-specific retention settings if they exist and have higher priority
+                        if keep and zone_config.priority > priority:
+                            mode = zone_config.mode
+                            priority = zone_config.priority
 
             # Delete recordings outside of the retention window or based on the retention mode
             if (

@@ -114,12 +114,12 @@ This configuration will retain recording segments that overlap with alerts and d
 
 ## What do the different retain modes mean?
 
-Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for continuous recording (but can also affect tracked objects).
+Arkos saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for continuous recording (but can also affect tracked objects).
 
-Let's say you have Frigate configured so that your doorbell camera would retain the last **2** days of continuous recording.
+Let's say you have Arkos configured so that your doorbell camera would retain the last **2** days of continuous recording.
 
 - With the `all` option all 48 hours of those two days would be kept and viewable.
-- With the `motion` option the only parts of those 48 hours would be segments that Frigate detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
+- With the `motion` option the only parts of those 48 hours would be segments that Arkos detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
 - With the `active_objects` option the only segments that would be kept are those where there was a true positive object that was not considered stationary.
 
 The same options are available with alerts and detections, except it will only save the recordings when it overlaps with a review item of that type.
@@ -143,6 +143,145 @@ record:
 ```
 
 The above configuration example can be added globally or on a per camera basis.
+
+## Enhanced Retention Policies
+
+Arkos supports enhanced retention policies that allow for more granular control over what recordings are kept and for how long. These enhanced policies include:
+
+### Retention by Priority
+
+You can assign different priority levels to recordings, which affects how they are handled when storage space is limited:
+
+```yaml
+record:
+  retain:
+    days: 7
+    mode: motion
+    priority: medium  # Options: low, medium, high, critical
+```
+
+Higher priority recordings are retained longer when storage space is limited.
+
+### Object-Specific Retention
+
+You can configure different retention policies for different object types:
+
+```yaml
+record:
+  retain:
+    days: 7
+    mode: motion
+    objects:
+      person:
+        days: 14
+        mode: all
+        min_score: 0.7
+        min_area: 1000
+        priority: high
+      car:
+        days: 10
+        mode: motion
+        priority: medium
+      package:
+        days: 30
+        mode: all
+        priority: critical
+```
+
+### Zone-Specific Retention
+
+You can configure different retention policies for different zones:
+
+```yaml
+record:
+  retain:
+    days: 7
+    mode: motion
+    zones:
+      driveway:
+        days: 14
+        mode: motion
+        priority: high
+      front_door:
+        days: 30
+        mode: all
+        priority: critical
+```
+
+### Time-Based Retention
+
+You can configure different retention policies for different times of day or days of the week:
+
+```yaml
+record:
+  retain:
+    days: 7
+    mode: motion
+    time_ranges:
+      - start_time: "18:00"
+        end_time: "06:00"
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday"]
+        # Recordings during these hours on weekdays will be kept
+      - start_time: "00:00"
+        end_time: "23:59"
+        days: ["saturday", "sunday"]
+        # All recordings on weekends will be kept
+```
+
+### Combining Retention Policies
+
+These retention policies can be combined to create sophisticated retention strategies:
+
+```yaml
+record:
+  enabled: True
+  retain:
+    days: 3
+    mode: motion
+    priority: medium
+    objects:
+      person:
+        days: 14
+        mode: all
+        priority: high
+      car:
+        days: 7
+        mode: motion
+        priority: medium
+    zones:
+      driveway:
+        days: 10
+        mode: motion
+        priority: high
+      front_door:
+        days: 30
+        mode: all
+        priority: critical
+    time_ranges:
+      - start_time: "18:00"
+        end_time: "06:00"
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday"]
+  alerts:
+    retain:
+      days: 30
+      mode: all
+      priority: high
+  detections:
+    retain:
+      days: 14
+      mode: motion
+      priority: medium
+```
+
+In this example:
+- Regular motion recordings are kept for 3 days
+- Person detections are kept for 14 days with all frames
+- Car detections are kept for 7 days with motion frames
+- Recordings in the driveway zone are kept for 10 days
+- Recordings in the front door zone are kept for 30 days
+- Recordings during nighttime hours on weekdays are kept
+- Alert recordings are kept for 30 days with all frames
+- Detection recordings are kept for 14 days with motion frames
 
 ## Can I have "continuous" recordings, but only at certain times?
 

@@ -34,6 +34,10 @@ record:
         min_free_space_mb: 5000
         readonly: false
         events_only: false
+        min_priority: low  # Minimum priority level for recordings to be stored in this tier
+        objects: []  # Empty means all objects
+        zones: []  # Empty means all zones
+        time_ranges: []  # Empty means all times
       
       # Warm tier (medium-speed storage for older recordings)
       - name: warm
@@ -45,6 +49,9 @@ record:
         min_free_space_mb: 10000
         readonly: false
         events_only: false
+        min_priority: medium
+        objects: ["person", "car"]  # Only store these object types
+        zones: []  # Empty means all zones
       
       # Cold tier (slow, inexpensive storage for archival recordings)
       - name: cold
@@ -56,6 +63,13 @@ record:
         min_free_space_mb: 50000
         readonly: false
         events_only: true  # Only store event recordings in this tier
+        min_priority: high  # Only store high or critical priority recordings
+        objects: []  # Empty means all objects
+        zones: ["front_door", "driveway"]  # Only store recordings from these zones
+        time_ranges:
+          - start_time: "18:00"
+            end_time: "06:00"
+            days: ["monday", "tuesday", "wednesday", "thursday", "friday"]
 ```
 
 ### Configuration Options
@@ -78,18 +92,32 @@ Each tier has the following options:
 - `min_free_space_mb`: Minimum free space in MB to maintain on this tier
 - `readonly`: Whether this tier is read-only
 - `events_only`: Whether this tier should only store event recordings
+- `min_priority`: Minimum priority level for recordings to be stored in this tier (low, medium, high, critical)
+- `objects`: List of object types to store in this tier (empty means all objects)
+- `zones`: List of zones to store in this tier (empty means all zones)
+- `time_ranges`: List of time ranges for this tier (empty means all times)
+  - `start_time`: Start time in HH:MM format
+  - `end_time`: End time in HH:MM format
+  - `days`: List of days of the week this time range applies to
 
 ## How It Works
 
 The tiered storage system works as follows:
 
 1. Recordings are initially stored in the default tier (the tier with the lowest priority value)
-2. Periodically, the system checks for recordings that should be moved to a different tier based on their age
-3. If a recording's age falls within the age range of a different tier, it is moved to that tier
+2. Periodically, the system checks for recordings that should be moved to a different tier based on:
+   - Age of the recording
+   - Whether it's an event recording
+   - Priority level of the recording
+   - Object types in the recording
+   - Zones present in the recording
+   - Time of day and day of week when the recording was made
+3. If a recording matches the criteria for a different tier, it is moved to that tier
 4. If a tier is running low on space (below `min_free_space_mb`), the system will:
-   - Try to move older recordings to lower-priority tiers
+   - Try to move recordings to lower-priority tiers based on the tier's criteria
    - If no suitable tier is found, delete the oldest recordings to free up space
 5. Event recordings (recordings associated with events marked with `retain_indefinitely=True`) can be prioritized by setting `events_only: true` on specific tiers
+6. Higher priority recordings (based on the `priority` field in retention policies) are retained longer when storage is limited
 
 ## Storage Tier Types
 
@@ -212,6 +240,147 @@ record:
         events_only: false
 ```
 
+### Priority-Based Configuration
+
+```yaml
+record:
+  tiered_storage:
+    enabled: true
+    check_interval: 3600
+    tiers:
+      - name: critical
+        path: /media/ssd/critical
+        type: hot
+        priority: 0
+        min_age_days: 0
+        max_age_days: null
+        min_free_space_mb: 5000
+        readonly: false
+        min_priority: critical
+      
+      - name: high
+        path: /media/ssd/high
+        type: hot
+        priority: 10
+        min_age_days: 0
+        max_age_days: 30
+        min_free_space_mb: 5000
+        readonly: false
+        min_priority: high
+      
+      - name: medium
+        path: /media/hdd/medium
+        type: warm
+        priority: 100
+        min_age_days: 0
+        max_age_days: 14
+        min_free_space_mb: 10000
+        readonly: false
+        min_priority: medium
+      
+      - name: low
+        path: /media/hdd/low
+        type: cold
+        priority: 200
+        min_age_days: 0
+        max_age_days: 7
+        min_free_space_mb: 10000
+        readonly: false
+        min_priority: low
+```
+
+### Object and Zone-Based Configuration
+
+```yaml
+record:
+  tiered_storage:
+    enabled: true
+    check_interval: 3600
+    tiers:
+      - name: people
+        path: /media/ssd/people
+        type: hot
+        priority: 0
+        min_age_days: 0
+        max_age_days: 30
+        min_free_space_mb: 5000
+        readonly: false
+        objects: ["person"]
+      
+      - name: vehicles
+        path: /media/ssd/vehicles
+        type: hot
+        priority: 10
+        min_age_days: 0
+        max_age_days: 14
+        min_free_space_mb: 5000
+        readonly: false
+        objects: ["car", "truck", "motorcycle"]
+      
+      - name: front_door
+        path: /media/hdd/front_door
+        type: warm
+        priority: 100
+        min_age_days: 0
+        max_age_days: 30
+        min_free_space_mb: 10000
+        readonly: false
+        zones: ["front_door"]
+      
+      - name: other
+        path: /media/hdd/other
+        type: cold
+        priority: 200
+        min_age_days: 0
+        max_age_days: 7
+        min_free_space_mb: 10000
+        readonly: false
+```
+
+### Time-Based Configuration
+
+```yaml
+record:
+  tiered_storage:
+    enabled: true
+    check_interval: 3600
+    tiers:
+      - name: night
+        path: /media/ssd/night
+        type: hot
+        priority: 0
+        min_age_days: 0
+        max_age_days: 14
+        min_free_space_mb: 5000
+        readonly: false
+        time_ranges:
+          - start_time: "18:00"
+            end_time: "06:00"
+            days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+      
+      - name: weekends
+        path: /media/ssd/weekends
+        type: hot
+        priority: 10
+        min_age_days: 0
+        max_age_days: 14
+        min_free_space_mb: 5000
+        readonly: false
+        time_ranges:
+          - start_time: "00:00"
+            end_time: "23:59"
+            days: ["saturday", "sunday"]
+      
+      - name: other
+        path: /media/hdd/other
+        type: warm
+        priority: 100
+        min_age_days: 0
+        max_age_days: 7
+        min_free_space_mb: 10000
+        readonly: false
+```
+
 ### Read-Only Archive Tier
 
 ```yaml
@@ -239,3 +408,4 @@ record:
         min_free_space_mb: 1000
         readonly: true  # This tier is read-only
         events_only: true
+        min_priority: high  # Only archive high and critical priority recordings

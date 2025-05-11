@@ -197,20 +197,89 @@ class TieredStorageManager(threading.Thread):
         logger.info(f"Initialized {len(self.tiers)} storage tiers")
 
     def get_tier_for_recording(
-        self, recording_age_days: float, is_event: bool = False
+        self, recording_age_days: float, is_event: bool = False, 
+        priority: str = "medium", object_type: Optional[str] = None,
+        zones: Optional[List[str]] = None, recording_time: Optional[datetime.datetime] = None
     ) -> Optional[StorageTier]:
         """Get the appropriate tier for a recording of the given age.
 
         Args:
             recording_age_days: Age of the recording in days
             is_event: Whether the recording is an event recording
+            priority: Priority level of the recording
+            object_type: Type of object in the recording
+            zones: Zones present in the recording
+            recording_time: Timestamp of the recording
 
         Returns:
             The appropriate storage tier, or None if no tier is suitable
         """
+        suitable_tiers = []
+        
         for tier in self.tiers:
-            if tier.can_store(recording_age_days, is_event):
-                return tier
+            # Check basic storage conditions
+            if not tier.can_store(recording_age_days, is_event):
+                continue
+                
+            # Check priority level
+            if hasattr(tier, "min_priority"):
+                priority_levels = {
+                    "low": 0,
+                    "medium": 1,
+                    "high": 2,
+                    "critical": 3
+                }
+                recording_priority_level = priority_levels.get(priority.lower(), 1)
+                tier_min_priority_level = priority_levels.get(tier.min_priority.lower(), 0)
+                
+                if recording_priority_level < tier_min_priority_level:
+                    continue
+            
+            # Check object type restrictions
+            if hasattr(tier, "objects") and tier.objects and object_type:
+                if object_type not in tier.objects:
+                    continue
+            
+            # Check zone restrictions
+            if hasattr(tier, "zones") and tier.zones and zones:
+                zone_match = False
+                for zone in zones:
+                    if zone in tier.zones:
+                        zone_match = True
+                        break
+                if not zone_match:
+                    continue
+            
+            # Check time range restrictions
+            if hasattr(tier, "time_ranges") and tier.time_ranges and recording_time:
+                time_match = False
+                recording_hour = recording_time.hour
+                recording_minute = recording_time.minute
+                recording_day = recording_time.strftime("%A").lower()
+                recording_minutes = recording_hour * 60 + recording_minute
+                
+                for time_range in tier.time_ranges:
+                    start_hour, start_minute = map(int, time_range.start_time.split(":"))
+                    end_hour, end_minute = map(int, time_range.end_time.split(":"))
+                    
+                    start_minutes = start_hour * 60 + start_minute
+                    end_minutes = end_hour * 60 + end_minute
+                    
+                    if (recording_day in time_range.days and 
+                        start_minutes <= recording_minutes <= end_minutes):
+                        time_match = True
+                        break
+                
+                if not time_match:
+                    continue
+            
+            # If we've passed all checks, this tier is suitable
+            suitable_tiers.append(tier)
+        
+        # If we have suitable tiers, return the one with the highest priority (lowest number)
+        if suitable_tiers:
+            return min(suitable_tiers, key=lambda t: t.priority)
+        
         return None
 
     def get_tier_for_path(self, path: str) -> Optional[StorageTier]:
@@ -297,19 +366,35 @@ class TieredStorageManager(threading.Thread):
             .namedtuples()
         )
 
-        # Get all events with retain_indefinitely=True
+        # Get all events with retain_indefinitely=True and their metadata
         events = (
-            Event.select(Event.id, Event.start_time, Event.end_time, Event.camera)
+            Event.select(
+                Event.id, 
+                Event.start_time, 
+                Event.end_time, 
+                Event.camera, 
+                Event.data
+            )
             .where(Event.retain_indefinitely == True)
             .namedtuples()
         )
 
-        # Create a lookup of event recordings by camera and time range
-        event_recordings: Dict[str, List[Tuple[float, float]]] = {}
+        # Create a lookup of event recordings by camera and time range with metadata
+        event_recordings: Dict[str, List[Tuple[float, float, Dict]]] = {}
         for event in events:
             if event.camera not in event_recordings:
                 event_recordings[event.camera] = []
-            event_recordings[event.camera].append((event.start_time, event.end_time))
+            
+            # Extract metadata from event
+            metadata = {}
+            if hasattr(event, "data") and event.data:
+                metadata = event.data
+            
+            event_recordings[event.camera].append((
+                event.start_time, 
+                event.end_time, 
+                metadata
+            ))
 
         now = datetime.datetime.now().timestamp()
         moved_count = 0
@@ -323,10 +408,14 @@ class TieredStorageManager(threading.Thread):
             # Calculate the age of the recording in days
             age_days = (now - recording.end_time) / (24 * 60 * 60)
 
-            # Check if this is an event recording
+            # Check if this is an event recording and gather metadata
             is_event = False
+            priority = "medium"  # Default priority
+            object_type = None
+            zones = []
+            
             if recording.camera in event_recordings:
-                for start_time, end_time in event_recordings[recording.camera]:
+                for start_time, end_time, metadata in event_recordings[recording.camera]:
                     # If the recording overlaps with an event, it's an event recording
                     if (
                         end_time is None
@@ -334,8 +423,20 @@ class TieredStorageManager(threading.Thread):
                         and start_time <= recording.end_time
                     ):
                         is_event = True
+                        
+                        # Extract metadata for tier selection
+                        if "priority" in metadata:
+                            priority = metadata["priority"]
+                        if "label" in metadata:
+                            object_type = metadata["label"]
+                        if "zones" in metadata:
+                            zones = metadata["zones"]
+                        
                         break
 
+            # Get the recording timestamp for time-based policies
+            recording_time = datetime.datetime.fromtimestamp(recording.start_time)
+            
             # Get the current tier for this recording
             current_tier = self.get_tier_for_path(recording.path)
             if current_tier is None:
@@ -344,8 +445,16 @@ class TieredStorageManager(threading.Thread):
                 )
                 continue
 
-            # Get the appropriate tier for this recording
-            target_tier = self.get_tier_for_recording(age_days, is_event)
+            # Get the appropriate tier for this recording with enhanced criteria
+            target_tier = self.get_tier_for_recording(
+                age_days, 
+                is_event, 
+                priority, 
+                object_type, 
+                zones, 
+                recording_time
+            )
+            
             if target_tier is None:
                 logger.warning(
                     f"No suitable tier found for recording {recording.id} with age {age_days} days"
@@ -369,6 +478,11 @@ class TieredStorageManager(threading.Thread):
                     Recordings.id == recording.id
                 ).execute()
                 moved_count += 1
+                logger.debug(
+                    f"Moved recording {recording.id} to tier {target_tier.name} based on: "
+                    f"age={age_days} days, is_event={is_event}, priority={priority}, "
+                    f"object_type={object_type}, zones={zones}"
+                )
             else:
                 error_count += 1
 
