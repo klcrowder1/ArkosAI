@@ -17,6 +17,8 @@ import arkos.util as util
 from arkos.api.auth import hash_password
 from arkos.api.fastapi_app import create_fastapi_app
 from arkos.camera import CameraMetrics, PTZMetrics
+from arkos.camera.connection import CameraConnectionManager
+from arkos.camera.integration import init_camera_connection_manager, register_camera_connection_api
 from arkos.comms.base_communicator import Communicator
 from arkos.comms.config_updater import ConfigPublisher
 from arkos.comms.dispatcher import Dispatcher
@@ -103,6 +105,7 @@ class ArkosApp:
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.config = config
+        self.camera_connection_manager: Optional[CameraConnectionManager] = None
 
     def ensure_dirs(self) -> None:
         dirs = [
@@ -350,6 +353,12 @@ class ArkosApp:
             self.onvif_controller,
             self.ptz_metrics,
             comms,
+        )
+        
+    def init_camera_connection_manager(self) -> None:
+        """Initialize the camera connection manager."""
+        self.camera_connection_manager = init_camera_connection_manager(
+            self.config, self.camera_metrics
         )
 
     def start_detectors(self) -> None:
@@ -659,21 +668,28 @@ class ArkosApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+        self.init_camera_connection_manager()
 
         self.init_auth()
 
         try:
+            app = create_fastapi_app(
+                self.config,
+                self.db,
+                self.embeddings,
+                self.detected_frames_processor,
+                self.storage_maintainer,
+                self.onvif_controller,
+                self.stats_emitter,
+                self.event_metadata_updater,
+            )
+            
+            # Register camera connection API endpoints
+            if self.camera_connection_manager:
+                register_camera_connection_api(app, self.camera_connection_manager)
+                
             uvicorn.run(
-                create_fastapi_app(
-                    self.config,
-                    self.db,
-                    self.embeddings,
-                    self.detected_frames_processor,
-                    self.storage_maintainer,
-                    self.onvif_controller,
-                    self.stats_emitter,
-                    self.event_metadata_updater,
-                ),
+                app,
                 host="127.0.0.1",
                 port=5001,
                 log_level="error",
@@ -693,6 +709,10 @@ class ArkosApp:
         ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
             ReviewSegment.end_time == None
         ).execute()
+
+        # stop the camera connection manager
+        if self.camera_connection_manager:
+            self.camera_connection_manager.stop()
 
         # stop the audio process
         if self.audio_process:
