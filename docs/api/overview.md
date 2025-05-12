@@ -488,3 +488,5 @@ When breaking changes are introduced, a new API version is created:
 ```
 
 Older API versions are supported for a transition period to allow clients to migrate to the new version.
+
+For detailed information about API versioning, including how to specify versions, version negotiation, and best practices, see the [API Versioning](./versioning.md) documentation.

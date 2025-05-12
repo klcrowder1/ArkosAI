@@ -16,7 +16,15 @@ from fastapi.staticfiles import StaticFiles
 from arkos.api.base import create_error_response
 from arkos.api.docs import setup_api_docs, generate_openapi_spec
 from arkos.api.rate_limit import setup_rate_limiting
-from arkos.api.version import APIVersion, VersionedAPIRouter, register_api_versions
+from arkos.api.version import (
+    APIVersion, 
+    APIVersionConfig, 
+    APIVersionInfo, 
+    VersionStatus, 
+    VersionedAPIRouter, 
+    create_default_version_config, 
+    register_api_versions
+)
 from arkos.config import ArkosConfig
 from arkos.storage import StorageMaintainer, StorageMonitor
 from arkos.track.object_processing import TrackedObjectProcessor
@@ -129,8 +137,17 @@ def create_fastapi_app(
     from arkos.api.routers import register_routers
     register_routers(app, api_router, config)
     
-    # Register API versions
-    register_api_versions(app, api_router)
+    # Create API version configuration from the Arkos config
+    version_config = APIVersionConfig(
+        default_version=config.api.versioning.default_version,
+        current_version=config.api.versioning.current_version,
+        supported_versions=config.api.versioning.supported_versions,
+        redirect_deprecated=config.api.versioning.redirect_deprecated,
+        allow_version_override=config.api.versioning.allow_version_override,
+    )
+    
+    # Register API versions with configuration
+    register_api_versions(app, api_router, version_config)
     
     # Generate OpenAPI specification
     generate_openapi_spec(app, "docs/static/arkos-api.json")

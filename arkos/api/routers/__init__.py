@@ -55,4 +55,13 @@ def register_routers(
     api_router.include_router(storage_router, version=APIVersion.V1)
     api_router.include_router(system_router, version=APIVersion.V1)
     
+    # Register routers with API v2 (same routers for now, but could be different in the future)
+    api_router.include_router(auth_router, version=APIVersion.V2)
+    api_router.include_router(cameras_router, version=APIVersion.V2)
+    api_router.include_router(events_router, version=APIVersion.V2)
+    api_router.include_router(health_router, version=APIVersion.V2)
+    api_router.include_router(recordings_router, version=APIVersion.V2)
+    api_router.include_router(storage_router, version=APIVersion.V2)
+    api_router.include_router(system_router, version=APIVersion.V2)
+    
     logger.info("API routers registered")

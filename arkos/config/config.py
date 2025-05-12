@@ -37,6 +37,7 @@ from arkos.util.config import (
 from arkos.util.image import create_mask
 from arkos.util.services import auto_detect_hwaccel
 
+from .api import APIConfig
 from .auth import AuthConfig
 from .base import ArkosBaseModel
 from .camera import CameraConfig, CameraLiveConfig
@@ -331,6 +332,7 @@ class ArkosConfig(ArkosBaseModel):
     )
 
     # Global config
+    api: APIConfig = Field(default_factory=APIConfig, title="API configuration.")
     auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."

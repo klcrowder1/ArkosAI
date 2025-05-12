@@ -1,3 +1,28 @@
+# API configuration
+api:
+  enabled: true
+  host: 0.0.0.0
+  port: 5001
+  base_path: /api
+  cors_origins:
+    - "*"
+  rate_limit:
+    rate: 100
+    per: 60
+    burst: 200
+  versioning:
+    default_version: v1
+    current_version: v1
+    supported_versions:
+      - v1
+      - v2
+    redirect_deprecated: true
+    allow_version_override: true
+  docs_url: /api/docs
+  redoc_url: /api/redoc
+  openapi_url: /api/openapi.json
+  debug: false
+
 mqtt:
   host: mqtt
   port: 1883
