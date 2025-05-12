@@ -81,7 +81,7 @@ def distance(detection: np.array, estimate: np.array, detection_embedding=None, 
     return spatial_distance
 
 
-def frigate_distance(detection: Detection, tracked_object) -> float:
+def arkos_distance(detection: Detection, tracked_object) -> float:
     # Get embeddings if available
     detection_embedding = detection.embedding
     tracked_object_embedding = None
@@ -139,12 +139,12 @@ class NorfairTracker(ObjectTracker):
         self.object_type_configs = {
             "car": {
                 "filter_factory": OptimizedKalmanFilterFactory(R=3.2, Q=0.04),
-                "distance_function": frigate_distance,
+                "distance_function": arkos_distance,
                 "distance_threshold": 2.3,
             },
             "person": {
                 "filter_factory": OptimizedKalmanFilterFactory(R=3.0, Q=0.05),
-                "distance_function": frigate_distance,
+                "distance_function": arkos_distance,
                 "distance_threshold": 2.2,
                 "past_detections_length": 10,  # Increased for better history
                 "reid_distance_function": histogram_distance,
@@ -153,12 +153,12 @@ class NorfairTracker(ObjectTracker):
             },
             "license_plate": {
                 "filter_factory": OptimizedKalmanFilterFactory(R=2.3, Q=0.06),
-                "distance_function": frigate_distance,
+                "distance_function": arkos_distance,
                 "distance_threshold": 3.5,
             },
             "animal": {
                 "filter_factory": OptimizedKalmanFilterFactory(R=3.5, Q=0.08),
-                "distance_function": frigate_distance,
+                "distance_function": arkos_distance,
                 "distance_threshold": 2.8,
             },
         }
@@ -170,7 +170,7 @@ class NorfairTracker(ObjectTracker):
                     R=4.2,
                     Q=0.3,
                 ),
-                "distance_function": frigate_distance,
+                "distance_function": arkos_distance,
                 "distance_threshold": 1.8,
                 "past_detections_length": 8,
                 "reid_distance_function": histogram_distance,
@@ -182,7 +182,7 @@ class NorfairTracker(ObjectTracker):
                     R=4.0,
                     Q=0.25,
                 ),
-                "distance_function": frigate_distance,
+                "distance_function": arkos_distance,
                 "distance_threshold": 2.0,
                 "past_detections_length": 6,
                 "reid_distance_function": histogram_distance,
@@ -194,13 +194,13 @@ class NorfairTracker(ObjectTracker):
         # Default tracker configuration with improved parameters
         self.default_tracker_config = {
             "filter_factory": OptimizedKalmanFilterFactory(R=3.2, Q=0.04),
-            "distance_function": frigate_distance,
+            "distance_function": arkos_distance,
             "distance_threshold": 2.3,
         }
 
         self.default_ptz_tracker_config = {
             "filter_factory": OptimizedKalmanFilterFactory(R=3.8, Q=0.22),
-            "distance_function": frigate_distance,
+            "distance_function": arkos_distance,
             "distance_threshold": 2.8,
         }
 
@@ -229,14 +229,14 @@ class NorfairTracker(ObjectTracker):
         # Initialize default trackers
         self.default_tracker = {
             "static": Tracker(
-                distance_function=frigate_distance,
+                distance_function=arkos_distance,
                 distance_threshold=self.default_tracker_config["distance_threshold"],
                 initialization_delay=self.detect_config.min_initialized,
                 hit_counter_max=self.detect_config.max_disappeared,
                 filter_factory=self.default_tracker_config["filter_factory"],
             ),
             "ptz": Tracker(
-                distance_function=frigate_distance,
+                distance_function=arkos_distance,
                 distance_threshold=self.default_ptz_tracker_config[
                     "distance_threshold"
                 ],
