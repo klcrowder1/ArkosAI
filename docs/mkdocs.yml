@@ -136,6 +136,18 @@ nav:
     - Object Detection: features/object-detection.md
     - Event Filtering: features/event-filtering.md
     - Tiered Storage: features/tiered-storage.md
+  - API:
+    - Overview: api/overview.md
+    - Authentication: api/authentication.md
+    - Versioning: api/versioning.md
+    - Endpoints:
+      - Cameras: api/endpoints/cameras.md
+      - Events: api/endpoints/events.md
+      - Recordings: api/endpoints/recordings.md
+      - Health: api/endpoints/health.md
+      - Storage: api/endpoints/storage.md
+      - System: api/endpoints/system.md
+    - Client Libraries: api/client-libraries.md
   - Advanced:
     - Hardware Acceleration: advanced/hardware-acceleration.md
   - Troubleshooting: troubleshooting.md

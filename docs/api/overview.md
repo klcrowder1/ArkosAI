@@ -199,148 +199,93 @@ The API is organized into the following modules:
 
 ## API Endpoints
 
-### Core API Endpoints
+The Arkos AI API is organized into several modules, each with its own set of endpoints. Detailed documentation for each endpoint is available in the respective endpoint documentation.
 
-#### Cameras
+### Camera API Endpoints
+
+The Camera API provides endpoints for managing cameras, including listing cameras, getting camera details, creating and updating cameras, and managing camera connections.
 
 - `GET /api/v1/cameras`: List all cameras
 - `GET /api/v1/cameras/{camera_id}`: Get camera details
-- `PUT /api/v1/cameras/{camera_id}`: Update camera configuration
-- `GET /api/v1/cameras/{camera_id}/snapshot`: Get camera snapshot
-- `GET /api/v1/cameras/{camera_id}/stream`: Get camera stream (MJPEG)
-- `POST /api/v1/cameras/{camera_id}/ptz`: Control PTZ camera
+- `POST /api/v1/cameras`: Create a new camera
+- `PUT /api/v1/cameras/{camera_id}`: Update an existing camera
+- `DELETE /api/v1/cameras/{camera_id}`: Delete an existing camera
+- `GET /api/v1/cameras/connection/status`: Get connection status for all cameras
+- `GET /api/v1/cameras/{camera_id}/connection/status`: Get connection status for a specific camera
+- `POST /api/v1/cameras/{camera_id}/connection/reset`: Reset connection for a specific camera
 
-#### Events
+For detailed information, see the [Camera API Endpoints](./endpoints/cameras.md) documentation.
+
+### Event API Endpoints
+
+The Event API provides endpoints for managing events, including listing events, getting event details, creating and updating events, and accessing event media.
 
 - `GET /api/v1/events`: List events
 - `GET /api/v1/events/{event_id}`: Get event details
-- `DELETE /api/v1/events/{event_id}`: Delete event
-- `GET /api/v1/events/{event_id}/clip`: Get event clip
-- `GET /api/v1/events/{event_id}/snapshot`: Get event snapshot
-- `PUT /api/v1/events/{event_id}/tags`: Update event tags
+- `POST /api/v1/events/{camera_name}/{label}`: Create a new event
+- `PUT /api/v1/events/{event_id}`: Update an existing event
+- `DELETE /api/v1/events/{event_id}`: Delete an existing event
+- `GET /api/v1/events/{event_id}/thumbnail.jpg`: Get event thumbnail
+- `GET /api/v1/events/{event_id}/snapshot.jpg`: Get event snapshot
+- `GET /api/v1/events/{event_id}/clip.mp4`: Get event clip
 
-#### Recordings
+For detailed information, see the [Event API Endpoints](./endpoints/events.md) documentation.
+
+### Recording API Endpoints
+
+The Recording API provides endpoints for managing recordings, including listing recordings, getting recording details, creating and updating recordings, and exporting recordings.
 
 - `GET /api/v1/recordings`: List recordings
 - `GET /api/v1/recordings/{recording_id}`: Get recording details
-- `DELETE /api/v1/recordings/{recording_id}`: Delete recording
-- `GET /api/v1/recordings/{recording_id}/clip`: Get recording clip
+- `POST /api/v1/recordings`: Create a new recording
+- `PUT /api/v1/recordings/{recording_id}`: Update an existing recording
+- `DELETE /api/v1/recordings/{recording_id}`: Delete an existing recording
+- `POST /api/v1/recordings/{recording_id}/export`: Export a recording
+- `GET /api/v1/recordings/exports/{export_id}`: Get export status
+- `GET /api/v1/recordings/{recording_id}/video.mp4`: Get recording video
+- `GET /api/v1/recordings/{recording_id}/thumbnail.jpg`: Get recording thumbnail
 
-#### Config
-
-- `GET /api/v1/config`: Get system configuration
-- `PUT /api/v1/config`: Update system configuration
-- `POST /api/v1/config/validate`: Validate configuration
-- `POST /api/v1/config/backup`: Create configuration backup
-- `POST /api/v1/config/restore`: Restore configuration from backup
-
-### Analytics API Endpoints
-
-#### Models
-
-- `GET /api/v1/analytics/models`: List all models
-- `GET /api/v1/analytics/models/{model_id}`: Get model details
-- `POST /api/v1/analytics/models`: Upload a new model
-- `DELETE /api/v1/analytics/models/{model_id}`: Delete a model
-- `POST /api/v1/analytics/models/{model_id}/test`: Test a model
-
-#### Activities
-
-- `GET /api/v1/analytics/activities`: List detected activities
-- `GET /api/v1/analytics/activities/{activity_id}`: Get activity details
-- `GET /api/v1/analytics/behaviors`: List detected behaviors
-- `GET /api/v1/analytics/behaviors/{behavior_id}`: Get behavior details
-
-#### Audio
-
-- `GET /api/v1/analytics/audio/events`: List audio events
-- `GET /api/v1/analytics/audio/events/{event_id}`: Get audio event details
-- `GET /api/v1/analytics/audio/detectors`: List audio detectors
-- `POST /api/v1/analytics/audio/detectors/{detector_id}/test`: Test audio detector
+For detailed information, see the [Recording API Endpoints](./endpoints/recordings.md) documentation.
 
 ### Health API Endpoints
 
-#### Status
+The Health API provides endpoints for monitoring the health of the system, cameras, and storage.
 
-- `GET /api/v1/health/status`: Get overall health status
-- `GET /api/v1/health/status/{camera_id}`: Get health status for a specific camera
+- `GET /api/v1/health`: Get health status of the system, cameras, and storage
+- `GET /api/v1/health/system`: Get system health
+- `GET /api/v1/health/cameras`: Get camera health
+- `GET /api/v1/health/storage`: Get storage health
 
-#### Connectivity
+For detailed information, see the [Health API Endpoints](./endpoints/health.md) documentation.
 
-- `GET /api/v1/health/connectivity`: Get connectivity status for all cameras
-- `GET /api/v1/health/connectivity/{camera_id}`: Get connectivity status for a specific camera
-- `POST /api/v1/health/connectivity/{camera_id}/test`: Test connectivity for a specific camera
+### Storage API Endpoints
 
-#### Quality
+The Storage API provides endpoints for managing storage, including getting storage information, usage statistics, and managing backups and restores.
 
-- `GET /api/v1/health/quality`: Get quality status for all cameras
-- `GET /api/v1/health/quality/{camera_id}`: Get quality status for a specific camera
-- `GET /api/v1/health/quality/{camera_id}/dirty_lens`: Get dirty lens status for a specific camera
-- `POST /api/v1/health/quality/{camera_id}/dirty_lens/reset`: Reset dirty lens reference for a specific camera
-- `GET /api/v1/health/quality/{camera_id}/scene_change`: Get scene change status for a specific camera
-- `POST /api/v1/health/quality/{camera_id}/scene_change/reset`: Reset scene change reference for a specific camera
+- `GET /api/v1/storage`: Get storage information
+- `GET /api/v1/storage/usage`: Get storage usage statistics
+- `GET /api/v1/storage/backups`: List backups
+- `POST /api/v1/storage/backups`: Create a new backup
+- `GET /api/v1/storage/backups/{backup_id}`: Get backup details
+- `DELETE /api/v1/storage/backups/{backup_id}`: Delete an existing backup
+- `POST /api/v1/storage/restore`: Restore from a backup
+- `GET /api/v1/storage/restore/{restore_id}`: Get restore status
 
-### IO API Endpoints
-
-#### Hardware
-
-- `GET /api/v1/io/hardware/inputs`: List all hardware inputs
-- `GET /api/v1/io/hardware/inputs/{input_id}`: Get input details and state
-- `GET /api/v1/io/hardware/outputs`: List all hardware outputs
-- `GET /api/v1/io/hardware/outputs/{output_id}`: Get output details and state
-- `PUT /api/v1/io/hardware/outputs/{output_id}`: Set output state
-
-#### MQTT
-
-- `GET /api/v1/io/mqtt/status`: Get MQTT connection status
-- `GET /api/v1/io/mqtt/topics`: List all MQTT topics
-- `POST /api/v1/io/mqtt/publish`: Publish a message to an MQTT topic
-
-#### Triggers
-
-- `GET /api/v1/io/triggers`: List all triggers
-- `GET /api/v1/io/triggers/{trigger_id}`: Get trigger details
-- `POST /api/v1/io/triggers`: Create a new trigger
-- `PUT /api/v1/io/triggers/{trigger_id}`: Update a trigger
-- `DELETE /api/v1/io/triggers/{trigger_id}`: Delete a trigger
-- `POST /api/v1/io/triggers/{trigger_id}/test`: Test a trigger
-
-#### Scheduler
-
-- `GET /api/v1/io/scheduler/schedules`: List all schedules
-- `GET /api/v1/io/scheduler/schedules/{schedule_id}`: Get schedule details
-- `POST /api/v1/io/scheduler/schedules`: Create a new schedule
-- `PUT /api/v1/io/scheduler/schedules/{schedule_id}`: Update a schedule
-- `DELETE /api/v1/io/scheduler/schedules/{schedule_id}`: Delete a schedule
-- `POST /api/v1/io/scheduler/schedules/{schedule_id}/run`: Run a schedule manually
+For detailed information, see the [Storage API Endpoints](./endpoints/storage.md) documentation.
 
 ### System API Endpoints
 
-#### Status
+The System API provides endpoints for managing the system, including getting system information, statistics, configuration, logs, and performing system operations.
 
-- `GET /api/v1/system/status`: Get system status
+- `GET /api/v1/system/info`: Get system information
 - `GET /api/v1/system/stats`: Get system statistics
-- `GET /api/v1/system/storage`: Get storage status
-
-#### Logs
-
+- `GET /api/v1/system/config`: Get system configuration
+- `PUT /api/v1/system/config`: Update system configuration
+- `POST /api/v1/system/restart`: Restart the system
 - `GET /api/v1/system/logs`: Get system logs
-- `GET /api/v1/system/logs/{log_id}`: Get specific log details
-- `POST /api/v1/system/logs/download`: Download logs as a file
+- `GET /api/v1/system/version`: Get version
 
-#### Updates
-
-- `GET /api/v1/system/updates`: Check for updates
-- `POST /api/v1/system/updates/install`: Install updates
-
-#### Users
-
-- `GET /api/v1/system/users`: List all users
-- `GET /api/v1/system/users/{user_id}`: Get user details
-- `POST /api/v1/system/users`: Create a new user
-- `PUT /api/v1/system/users/{user_id}`: Update a user
-- `DELETE /api/v1/system/users/{user_id}`: Delete a user
-- `POST /api/v1/system/users/{user_id}/reset-password`: Reset user password
+For detailed information, see the [System API Endpoints](./endpoints/system.md) documentation.
 
 ## WebSocket API
 
