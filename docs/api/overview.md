@@ -38,7 +38,7 @@ For server-to-server communication, API key authentication is used:
 
 ```http
 GET /api/v1/cameras
-Authorization: Bearer <api-key>
+X-API-Key: <api-key>
 ```
 
 ### JWT Authentication
@@ -66,10 +66,19 @@ Response:
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expires_at": "2023-01-01T12:00:00Z"
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "username": "admin",
+    "role": "admin",
+    "is_active": true
+  }
 }
 ```
+
+For detailed information about authentication and authorization, including user management, API keys, sessions, and role-based access control, see the [Authentication and Authorization](./authentication.md) documentation.
 
 ## Error Handling
 
