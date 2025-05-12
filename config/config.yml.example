@@ -130,6 +130,72 @@ record:
         readonly: false
         events_only: true  # Only store event recordings in this tier
 
+# Storage configuration
+storage:
+  # Backup and recovery configuration
+  backup:
+    # Backup destinations
+    destinations:
+      # Local backup destination
+      - name: local_backup
+        type: local
+        path: /media/backup/arkos
+        retention_days: 30
+        max_backups: 10
+      
+      # Remote backup destination (SSH/rsync)
+      - name: remote_backup
+        type: remote
+        path: /backup/arkos
+        host: backup-server.example.com
+        user: backup-user
+        ssh_key: /config/ssh/id_rsa
+        retention_days: 60
+        max_backups: 20
+      
+      # Cloud backup destination (rclone)
+      - name: cloud_backup
+        type: cloud
+        path: arkos-backups
+        provider: gdrive
+        rclone_config: /config/rclone.conf
+        retention_days: 90
+        max_backups: 30
+    
+    # Scheduled backups
+    schedules:
+      # Daily configuration backup
+      - name: daily_config_backup
+        destination: local_backup
+        content_type: config
+        frequency: daily
+        time: "02:00"
+        enabled: true
+      
+      # Weekly full backup to remote server
+      - name: weekly_full_backup
+        destination: remote_backup
+        content_type: all
+        frequency: weekly
+        day: 0  # Sunday
+        time: "03:00"
+        enabled: true
+      
+      # Monthly cloud backup
+      - name: monthly_cloud_backup
+        destination: cloud_backup
+        content_type: all
+        frequency: monthly
+        day: 1  # First day of the month
+        time: "04:00"
+        enabled: true
+    
+    # Backup verification
+    verification:
+      enabled: true
+      verify_after_backup: true
+      auto_verify_interval: 168  # 7 days in hours
+
 # Camera-specific configuration
 cameras:
   # Standard camera example

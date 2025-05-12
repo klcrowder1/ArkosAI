@@ -739,7 +739,12 @@ class ArkosApp:
             # Register storage API endpoints
             if hasattr(self, 'storage_monitor'):
                 from arkos.storage.integration import register_storage_api
-                register_storage_api(app, self.storage_monitor)
+                register_storage_api(
+                    app, 
+                    self.storage_monitor, 
+                    self.config, 
+                    self.dispatcher if hasattr(self, 'dispatcher') else None
+                )
                 
             uvicorn.run(
                 app,
