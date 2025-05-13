@@ -1663,7 +1663,7 @@ function ArkosCameraFeatures({
                           {t("stream.audio.tips.title")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
-                              to="https://docs.frigate.video/configuration/live"
+                              to="https://docs.arkos.ai/configuration/live"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline"

@@ -1,0 +1,75 @@
+{
+  "label.back": "Back",
+  "button.back": "Back",
+  "button.fullscreen": "Fullscreen",
+  "button.close": "Close",
+  "button.pictureInPicture": "Picture in Picture",
+  "settings": "Settings",
+  
+  "layout.grid": "Grid",
+  "layout.dashboard": "Dashboard",
+  
+  "tabs.live": "Live",
+  "tabs.recordings": "Recordings",
+  "tabs.events": "Events",
+  "tabs.info": "Info",
+  
+  "recordings.notImplemented": "Recordings view is not yet implemented",
+  "events.notImplemented": "Events view is not yet implemented",
+  
+  "controls.motion": "Motion Detection",
+  "controls.recording": "Recording",
+  "controls.detection": "Object Detection",
+  "controls.snapshots": "Snapshots",
+  
+  "status": "Status",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  
+  "info.general": "General Information",
+  "info.name": "Name",
+  "info.type": "Type",
+  "info.resolution": "Resolution",
+  "info.fps": "FPS",
+  "info.uptime": "Uptime",
+  
+  "info.storage": "Storage",
+  "info.totalStorage": "Total Storage",
+  "info.retentionDays": "Retention Days",
+  "info.retentionMode": "Retention Mode",
+  "info.bandwidth": "Bandwidth",
+  
+  "info.events": "Events",
+  "info.eventsToday": "Events Today",
+  "info.eventsWeek": "Events This Week",
+  "info.eventsMonth": "Events This Month",
+  
+  "info.zones": "Zones",
+  "info.noZones": "No zones configured for this camera",
+  
+  "timeline.title": "Timeline",
+  "timeline.date": "Date",
+  "timeline.time": "Time",
+  
+  "controls.play": "Play",
+  "controls.pause": "Pause",
+  "controls.skipForward": "Skip Forward",
+  "controls.skipBackward": "Skip Backward",
+  
+  "stream.title": "Stream",
+  "stream.audio.available": "Audio available",
+  "stream.audio.unavailable": "Audio unavailable",
+  "stream.audio.tips.title": "To enable audio, make sure your camera supports audio and it's properly configured in the stream settings.",
+  "stream.audio.tips.documentation": "Read the documentation",
+  
+  "stream.twoWayTalk.available": "Two-way talk available",
+  "stream.twoWayTalk.unavailable": "Two-way talk unavailable",
+  "stream.twoWayTalk.tips": "To enable two-way talk, make sure your camera supports audio input and it's properly configured in the stream settings.",
+  "stream.twoWayTalk.tips.documentation": "Read the documentation",
+  
+  "stream.lowBandwidth.tips": "Using low bandwidth mode due to streaming issues",
+  "stream.lowBandwidth.resetStream": "Reset Stream",
+  
+  "stream.playInBackground.label": "Play in Background",
+  "stream.playInBackground.tips": "Keep the stream active when switching to other tabs or applications"
+}

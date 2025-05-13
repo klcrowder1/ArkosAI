@@ -1,0 +1,47 @@
+{
+  "label.back": "Back",
+  "button.back": "Back",
+  
+  "title": "Timeline",
+  "date": "Date",
+  "time": "Time",
+  
+  "controls.play": "Play",
+  "controls.pause": "Pause",
+  "controls.skipForward": "Skip Forward 30s",
+  "controls.skipBackward": "Skip Backward 30s",
+  
+  "speed.0.5x": "0.5x Speed",
+  "speed.1x": "Normal Speed",
+  "speed.2x": "2x Speed",
+  "speed.4x": "4x Speed",
+  
+  "segments.motion": "Motion",
+  "segments.alert": "Alert",
+  "segments.continuous": "Continuous",
+  
+  "no.recordings": "No recordings found for this time period",
+  "loading": "Loading timeline data...",
+  
+  "export.title": "Export Recording",
+  "export.start": "Start Time",
+  "export.end": "End Time",
+  "export.format": "Format",
+  "export.quality": "Quality",
+  "export.button": "Export",
+  
+  "calendar.today": "Today",
+  "calendar.yesterday": "Yesterday",
+  "calendar.thisWeek": "This Week",
+  "calendar.lastWeek": "Last Week",
+  "calendar.thisMonth": "This Month",
+  "calendar.custom": "Custom Range",
+  
+  "filter.all": "All Events",
+  "filter.motion": "Motion Only",
+  "filter.alerts": "Alerts Only",
+  "filter.objects": "Objects",
+  "filter.person": "Person",
+  "filter.vehicle": "Vehicle",
+  "filter.animal": "Animal"
+}
