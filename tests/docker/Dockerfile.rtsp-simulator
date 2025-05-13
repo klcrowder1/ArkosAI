@@ -1,0 +1,43 @@
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-gi \
+    python3-gst-1.0 \
+    gstreamer1.0-tools \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-rtsp \
+    gstreamer1.0-libav \
+    libgstrtspserver-1.0-dev \
+    gir1.2-gst-rtsp-server-1.0 \
+    ffmpeg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create directories
+RUN mkdir -p /app/videos /app/audio
+
+# Copy test videos and audio
+COPY tests/fixtures/sample_videos/ /app/videos/
+COPY tests/fixtures/sample_audio/ /app/audio/
+
+# Copy RTSP server script
+COPY tests/rtsp/rtsp_server.py /app/
+
+# Set working directory
+WORKDIR /app
+
+# Expose ports
+EXPOSE 8554/tcp
+EXPOSE 8556/tcp
+
+# Set entrypoint
+ENTRYPOINT ["python3", "rtsp_server.py", "--videos-dir", "/app/videos", "--host", "0.0.0.0", "--port", "8554", "--onvif-port", "8556"]

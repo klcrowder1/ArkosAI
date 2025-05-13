@@ -1,0 +1,123 @@
+# Pre-commit configuration for Arkos AI
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=100']
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ['--profile=black', '--line-length=100']
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [
+          'flake8-docstrings==1.7.0',
+          'flake8-bugbear==23.7.10',
+          'flake8-comprehensions==3.14.0',
+          'flake8-simplify==0.20.0',
+        ]
+        args: [
+          '--max-line-length=100',
+          '--ignore=E203,W503,D100,D104,D107',
+          '--exclude=migrations,__pycache__,build,dist',
+        ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+          'types-requests',
+          'types-PyYAML',
+          'types-setuptools',
+        ]
+        args: [
+          '--ignore-missing-imports',
+          '--disallow-untyped-defs',
+          '--disallow-incomplete-defs',
+          '--check-untyped-defs',
+          '--disallow-untyped-decorators',
+          '--no-implicit-optional',
+          '--warn-redundant-casts',
+          '--warn-return-any',
+          '--warn-unused-ignores',
+        ]
+        exclude: '^(migrations/|tests/)'
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ['-c', 'pyproject.toml']
+        additional_dependencies: ['bandit[toml]']
+
+  - repo: https://github.com/pycqa/pylint
+    rev: v2.17.5
+    hooks:
+      - id: pylint
+        args: [
+          '--disable=C0111,C0103,C0303,W0511,R0903,R0902,R0913,R0914',
+          '--max-line-length=100',
+          '--ignore=migrations',
+          '--extension-pkg-whitelist=numpy,cv2,tensorflow',
+        ]
+        exclude: '^(migrations/|tests/)'
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
+    hooks:
+      - id: prettier
+        types_or: [javascript, jsx, ts, tsx, css, json, yaml]
+        additional_dependencies:
+          - prettier@3.0.3
+          - '@typescript-eslint/eslint-plugin@6.4.1'
+          - '@typescript-eslint/parser@6.4.1'
+          - eslint@8.47.0
+          - eslint-config-prettier@9.0.0
+          - eslint-plugin-react@7.33.2
+          - eslint-plugin-react-hooks@4.6.0
+          - typescript@5.1.6
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.47.0
+    hooks:
+      - id: eslint
+        types: [file]
+        files: \.(js|jsx|ts|tsx)$
+        additional_dependencies:
+          - eslint@8.47.0
+          - '@typescript-eslint/eslint-plugin@6.4.1'
+          - '@typescript-eslint/parser@6.4.1'
+          - eslint-config-prettier@9.0.0
+          - eslint-plugin-react@7.33.2
+          - eslint-plugin-react-hooks@4.6.0
+          - typescript@5.1.6
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.5
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']

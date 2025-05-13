@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  arkos-ai:
+    build:
+      context: .
+      dockerfile: docker/main/Dockerfile
+    container_name: arkos-ai-test
+    volumes:
+      - ./config:/config
+      - ./storage:/storage
+      - ./tests:/tests
+    ports:
+      - "5000:5000"
+      - "1935:1935"
+    environment:
+      - CONFIG_FILE=/config/config.yml
+      - STORAGE_DIR=/storage
+      - LOG_LEVEL=DEBUG
+      - TESTING=true
+    depends_on:
+      - rtsp-simulator
+      - mqtt
+    networks:
+      - arkos-test-network
+
+  rtsp-simulator:
+    build:
+      context: .
+      dockerfile: tests/docker/Dockerfile.rtsp-simulator
+    container_name: arkos-rtsp-simulator
+    ports:
+      - "8554:8554"
+      - "8556:8556"
+    volumes:
+      - ./tests/fixtures/sample_videos:/app/videos
+      - ./tests/fixtures/sample_audio:/app/audio
+    restart: unless-stopped
+    networks:
+      - arkos-test-network
+
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: arkos-mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./tests/docker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+    networks:
+      - arkos-test-network
+
+networks:
+  arkos-test-network:
+    driver: bridge

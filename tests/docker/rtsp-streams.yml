@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  rtsp-simulator:
+    build:
+      context: ../..
+      dockerfile: tests/docker/Dockerfile.rtsp-simulator
+    container_name: arkos-rtsp-simulator
+    ports:
+      - "8554:8554"
+      - "8556:8556"
+    volumes:
+      - ../../tests/fixtures/sample_videos:/app/videos
+      - ../../tests/fixtures/sample_audio:/app/audio
+    restart: unless-stopped
+    networks:
+      - arkos-test-network
+
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: arkos-mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+    networks:
+      - arkos-test-network
+
+networks:
+  arkos-test-network:
+    driver: bridge
