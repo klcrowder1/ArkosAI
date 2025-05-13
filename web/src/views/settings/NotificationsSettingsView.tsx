@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { ArkosConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 
@@ -62,7 +62,7 @@ export default function NotificationView({
 }: NotificationsSettingsViewProps) {
   const { t } = useTranslation(["views/settings"]);
 
-  const { data: config, mutate: updateConfig } = useSWR<FrigateConfig>(
+  const { data: config, mutate: updateConfig } = useSWR<ArkosConfig>(
     "config",
     {
       revalidateOnFocus: false,
@@ -316,7 +316,7 @@ export default function NotificationView({
                 <p>{t("notification.notificationSettings.desc")}</p>
                 <div className="flex items-center text-primary">
                   <Link
-                    to="https://docs.frigate.video/configuration/notifications"
+                    to="https://docs.arkos.video/configuration/notifications"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline"
@@ -338,7 +338,7 @@ export default function NotificationView({
                 </Trans>
                 <div className="mt-3 flex items-center">
                   <Link
-                    to="https://docs.frigate.video/configuration/authentication"
+                    to="https://docs.arkos.video/configuration/authentication"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline"
@@ -371,7 +371,7 @@ export default function NotificationView({
                   <p>{t("notification.notificationSettings.desc")}</p>
                   <div className="flex items-center text-primary">
                     <Link
-                      to="https://docs.frigate.video/configuration/notifications"
+                      to="https://docs.arkos.video/configuration/notifications"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"
@@ -609,7 +609,7 @@ export default function NotificationView({
 }
 
 type CameraNotificationSwitchProps = {
-  config?: FrigateConfig;
+  config?: ArkosConfig;
   camera: string;
 };
 
@@ -659,11 +659,11 @@ export function CameraNotificationSwitch({
       date_format:
         config?.ui.time_format == "24hour"
           ? t("time.formattedTimestampMonthDayHourMinute.24hour", {
-              ns: "common",
-            })
+            ns: "common",
+          })
           : t("time.formattedTimestampMonthDayHourMinute.12hour", {
-              ns: "common",
-            }),
+            ns: "common",
+          }),
       locale: locale,
     });
     return t("time.untilForTime", { ns: "common", time });

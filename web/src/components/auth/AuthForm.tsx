@@ -22,12 +22,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AuthContext } from "@/context/auth-context";
 import { useTranslation } from "react-i18next";
+import TwoFactorAuthForm from "./TwoFactorAuthForm";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const { t } = useTranslation(["components/auth"]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [showTwoFactor, setShowTwoFactor] = React.useState<boolean>(false);
+  const [userId, setUserId] = React.useState<string>("");
+  const [username, setUsername] = React.useState<string>("");
   const { login } = React.useContext(AuthContext);
 
   const formSchema = z.object({
@@ -44,7 +48,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      await axios.post(
+      const loginResponse = await axios.post(
         "/login",
         {
           user: values.user,
@@ -54,6 +58,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           headers: { "X-CSRF-TOKEN": 1 },
         },
       );
+      
+      // Check if 2FA is required
+      if (loginResponse.data?.requires_2fa) {
+        setUserId(loginResponse.data.user_id);
+        setUsername(values.user);
+        setShowTwoFactor(true);
+        setIsLoading(false);
+        return;
+      }
+      
+      // No 2FA required, proceed with normal login
       const profileRes = await axios.get("/profile", { withCredentials: true });
       login({
         username: profileRes.data.username,
@@ -85,6 +100,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       setIsLoading(false);
     }
   };
+
+  // If 2FA is required, show the 2FA form
+  if (showTwoFactor) {
+    return (
+      <TwoFactorAuthForm 
+        userId={userId} 
+        username={username} 
+        onCancel={() => setShowTwoFactor(false)} 
+      />
+    );
+  }
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>

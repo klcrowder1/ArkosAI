@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { ArkosConfig } from "@/types/frigateConfig";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
@@ -13,8 +13,9 @@ import { toast } from "sonner";
 import DeleteUserDialog from "@/components/overlay/DeleteUserDialog";
 import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
+import TwoFactorAuth from "@/components/auth/TwoFactorAuth";
 
-import { LuPlus, LuShield, LuUserCog } from "react-icons/lu";
+import { LuPlus, LuShield, LuUserCog, LuShieldCheck } from "react-icons/lu";
 import {
   Table,
   TableBody,
@@ -35,7 +36,7 @@ import { useTranslation } from "react-i18next";
 
 export default function AuthenticationView() {
   const { t } = useTranslation("views/settings");
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<ArkosConfig>("config");
   const { data: users, mutate: mutateUsers } = useSWR<User[]>("users");
 
   const [showSetPassword, setShowSetPassword] = useState(false);
@@ -196,6 +197,20 @@ export default function AuthenticationView() {
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+        <div className="mb-5 flex flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start">
+            <Heading as="h3" className="my-2">
+              {t("security.twoFactor.title")}
+            </Heading>
+            <p className="text-sm text-muted-foreground">
+              {t("security.twoFactor.desc")}
+            </p>
+          </div>
+        </div>
+        
+        <div className="mb-6">
+          <TwoFactorAuth userId={users?.find(u => u.username === "admin")?.id || ""} />
+        </div>
         <div className="mb-5 flex flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start">
             <Heading as="h3" className="my-2">
