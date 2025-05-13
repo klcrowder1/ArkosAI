@@ -1,0 +1,293 @@
+/* Responsive Utilities for Arkos AI
+ * This file contains utility classes for responsive design
+ */
+
+@layer utilities {
+  /* Responsive Container Classes */
+  .container-responsive {
+    @apply w-full px-4 md:px-6 lg:px-8;
+    max-width: 100%;
+  }
+
+  /* Responsive Spacing */
+  .spacing-responsive {
+    @apply p-2 sm:p-3 md:p-4 lg:p-6;
+  }
+
+  .spacing-responsive-x {
+    @apply px-2 sm:px-3 md:px-4 lg:px-6;
+  }
+
+  .spacing-responsive-y {
+    @apply py-2 sm:py-3 md:py-4 lg:py-6;
+  }
+
+  /* Responsive Typography */
+  .text-responsive-title {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+  }
+
+  .text-responsive-subtitle {
+    @apply text-lg sm:text-xl md:text-2xl font-semibold;
+  }
+
+  .text-responsive-body {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+
+  .text-responsive-small {
+    @apply text-xs sm:text-sm md:text-base;
+  }
+
+  /* Responsive Grid Layouts */
+  .grid-responsive-1 {
+    @apply grid grid-cols-1;
+  }
+
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2;
+  }
+
+  .grid-responsive-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .grid-responsive-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  /* Responsive Flex Layouts */
+  .flex-responsive-row {
+    @apply flex flex-col sm:flex-row;
+  }
+
+  .flex-responsive-col {
+    @apply flex flex-col;
+  }
+
+  /* Responsive Gap */
+  .gap-responsive {
+    @apply gap-2 sm:gap-3 md:gap-4 lg:gap-6;
+  }
+
+  .gap-responsive-x {
+    @apply gap-x-2 sm:gap-x-3 md:gap-x-4 lg:gap-x-6;
+  }
+
+  .gap-responsive-y {
+    @apply gap-y-2 sm:gap-y-3 md:gap-y-4 lg:gap-y-6;
+  }
+
+  /* Responsive Margins */
+  .margin-responsive {
+    @apply m-2 sm:m-3 md:m-4 lg:m-6;
+  }
+
+  .margin-responsive-x {
+    @apply mx-2 sm:mx-3 md:mx-4 lg:mx-6;
+  }
+
+  .margin-responsive-y {
+    @apply my-2 sm:my-3 md:my-4 lg:my-6;
+  }
+
+  /* Responsive Touch Targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Responsive Button Sizes */
+  .btn-responsive {
+    @apply px-3 py-2 text-sm sm:px-4 sm:py-2 sm:text-base md:px-5 md:py-2.5 md:text-lg;
+  }
+
+  /* Responsive Card */
+  .card-responsive {
+    @apply rounded-lg p-3 sm:p-4 md:p-5 md:rounded-xl;
+  }
+
+  /* Responsive Aspect Ratios */
+  .aspect-responsive-video {
+    @apply aspect-video;
+  }
+
+  .aspect-responsive-square {
+    @apply aspect-square;
+  }
+
+  /* Responsive Visibility */
+  .hidden-xs {
+    @apply hidden xs:block;
+  }
+
+  .hidden-sm {
+    @apply hidden sm:block;
+  }
+
+  .hidden-md {
+    @apply hidden md:block;
+  }
+
+  .hidden-lg {
+    @apply hidden lg:block;
+  }
+
+  .hidden-xl {
+    @apply hidden xl:block;
+  }
+
+  .visible-xs {
+    @apply block xs:hidden;
+  }
+
+  .visible-sm {
+    @apply block sm:hidden;
+  }
+
+  .visible-md {
+    @apply block md:hidden;
+  }
+
+  .visible-lg {
+    @apply block lg:hidden;
+  }
+
+  .visible-xl {
+    @apply block xl:hidden;
+  }
+
+  /* Responsive Scrollbar */
+  .scrollbar-responsive {
+    @apply scrollbar-thin scrollbar-track-background_alt scrollbar-thumb-border scrollbar-track-rounded-full scrollbar-thumb-rounded-full;
+  }
+
+  /* Responsive Shadows */
+  .shadow-responsive {
+    @apply shadow-sm sm:shadow md:shadow-md;
+  }
+
+  /* Responsive Border Radius */
+  .rounded-responsive {
+    @apply rounded-md sm:rounded-lg md:rounded-xl;
+  }
+
+  /* Responsive Width Constraints */
+  .max-w-responsive {
+    @apply max-w-full sm:max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl;
+  }
+
+  /* Responsive Height Constraints */
+  .h-responsive-screen {
+    @apply h-[85vh] sm:h-[90vh] md:h-[92vh] lg:h-[95vh];
+  }
+
+  /* Responsive Orientation Specific */
+  .portrait-only {
+    @apply block landscape:hidden;
+  }
+
+  .landscape-only {
+    @apply hidden landscape:block;
+  }
+
+  /* Responsive Z-index for UI layers */
+  .z-responsive-overlay {
+    @apply z-40;
+  }
+
+  .z-responsive-modal {
+    @apply z-50;
+  }
+
+  .z-responsive-tooltip {
+    @apply z-60;
+  }
+
+  /* Responsive Media Queries for Device Types */
+  @media (hover: hover) {
+    .hover-device-only {
+      @apply block;
+    }
+    .touch-device-only {
+      @apply hidden;
+    }
+  }
+
+  @media (hover: none) {
+    .hover-device-only {
+      @apply hidden;
+    }
+    .touch-device-only {
+      @apply block;
+    }
+  }
+
+  /* Responsive Grid Item Sizing */
+  .grid-item-responsive {
+    @apply col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3;
+  }
+
+  .grid-item-responsive-wide {
+    @apply col-span-12 sm:col-span-12 md:col-span-8 lg:col-span-6;
+  }
+
+  .grid-item-responsive-full {
+    @apply col-span-12;
+  }
+
+  /* Responsive Flex Direction based on Screen Size */
+  .flex-direction-responsive {
+    @apply flex-col sm:flex-row;
+  }
+
+  /* Responsive Padding for Touch Targets */
+  .touch-padding {
+    @apply p-2 sm:p-1;
+  }
+
+  /* Responsive Font Sizes for Different Screen Densities */
+  .text-density-responsive {
+    @apply text-base;
+  }
+
+  @media (min-resolution: 192dpi) {
+    .text-density-responsive {
+      @apply text-sm;
+    }
+  }
+
+  /* Responsive Container Padding */
+  .container-padding-responsive {
+    @apply px-2 sm:px-4 md:px-6 lg:px-8;
+  }
+
+  /* Responsive Scrolling Area */
+  .scroll-area-responsive {
+    @apply max-h-[300px] sm:max-h-[400px] md:max-h-[500px] lg:max-h-[600px] overflow-y-auto;
+  }
+
+  /* Responsive Form Controls */
+  .form-control-responsive {
+    @apply w-full p-2 sm:p-2.5 md:p-3 text-sm sm:text-base rounded-md sm:rounded-lg;
+  }
+
+  /* Responsive Table */
+  .table-responsive {
+    @apply w-full text-xs sm:text-sm md:text-base;
+  }
+
+  /* Responsive Icons */
+  .icon-responsive {
+    @apply w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6;
+  }
+
+  /* Responsive Navigation */
+  .nav-responsive {
+    @apply flex flex-col sm:flex-row items-center;
+  }
+
+  /* Responsive Sidebar */
+  .sidebar-responsive {
+    @apply w-full sm:w-64 md:w-72 lg:w-80;
+  }
+}
