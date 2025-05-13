@@ -55,7 +55,7 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
   defaultColorScheme = "theme-default",
-  storageKey = "frigate-ui-theme",
+  storageKey = "arkos-ui-theme",
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {

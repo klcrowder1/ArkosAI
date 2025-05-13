@@ -1,21 +1,21 @@
-import { FrigateConfig } from "@/types/frigateConfig";
+import { ArkosConfig } from "@/types/arkosConfig";
 import {
   CameraDetectThreshold,
   CameraFfmpegThreshold,
   InferenceThreshold,
 } from "@/types/graph";
-import { FrigateStats, PotentialProblem } from "@/types/stats";
+import { ArkosStats, PotentialProblem } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";
 import useDeepMemo from "./use-deep-memo";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
-import { useFrigateStats } from "@/api/ws";
+import { useArkosStats } from "@/api/ws";
 
 import { useTranslation } from "react-i18next";
 
-export default function useStats(stats: FrigateStats | undefined) {
+export default function useStats(stats: ArkosStats | undefined) {
   const { t } = useTranslation(["views/system"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<ArkosConfig>("config");
 
   const memoizedStats = useDeepMemo(stats);
 
@@ -110,11 +110,11 @@ export default function useStats(stats: FrigateStats | undefined) {
   return { potentialProblems };
 }
 
-export function useAutoFrigateStats() {
-  const { data: initialStats } = useSWR<FrigateStats>("stats", {
+export function useAutoArkosStats() {
+  const { data: initialStats } = useSWR<ArkosStats>("stats", {
     revalidateOnFocus: false,
   });
-  const latestStats = useFrigateStats();
+  const latestStats = useArkosStats();
 
   const stats = useMemo(() => {
     if (latestStats) {

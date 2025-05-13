@@ -3,7 +3,7 @@ import {
   StatusBarMessagesContext,
   StatusMessage,
 } from "@/context/statusbar-provider";
-import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
+import useStats, { useAutoArkosStats } from "@/hooks/use-stats";
 import { useContext, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,10 +19,10 @@ export default function Statusbar() {
     StatusBarMessagesContext,
   )!;
 
-  const stats = useAutoFrigateStats();
+  const stats = useAutoArkosStats();
 
   const cpuPercent = useMemo(() => {
-    const systemCpu = stats?.cpu_usages["frigate.full_system"]?.cpu;
+    const systemCpu = stats?.cpu_usages["arkos.full_system"]?.cpu;
 
     if (!systemCpu || systemCpu == "0.0") {
       return null;

@@ -3,13 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import {
   EmbeddingsReindexProgressType,
-  FrigateCameraState,
-  FrigateEvent,
-  FrigateReview,
+  ArkosCameraState,
+  ArkosEvent,
+  ArkosReview,
   ModelState,
   ToggleableSetting,
 } from "@/types/ws";
-import { FrigateStats } from "@/types/stats";
+import { ArkosStats } from "@/types/stats";
 import { createContainer } from "react-tracked";
 import useDeepMemo from "@/hooks/use-deep-memo";
 
@@ -44,7 +44,7 @@ function useValue(): useValueReturn {
       return;
     }
 
-    const cameraActivity: { [key: string]: FrigateCameraState } =
+    const cameraActivity: { [key: string]: ArkosCameraState } =
       JSON.parse(activityValue);
 
     if (Object.keys(cameraActivity).length === 0) {
@@ -278,21 +278,21 @@ export function useRestart(): {
   return { payload: payload as string, send };
 }
 
-export function useFrigateEvents(): { payload: FrigateEvent } {
+export function useArkosEvents(): { payload: ArkosEvent } {
   const {
     value: { payload },
   } = useWs("events", "");
   return { payload: JSON.parse(payload as string) };
 }
 
-export function useFrigateReviews(): FrigateReview {
+export function useArkosReviews(): ArkosReview {
   const {
     value: { payload },
   } = useWs("reviews", "");
   return useDeepMemo(JSON.parse(payload as string));
 }
 
-export function useFrigateStats(): FrigateStats {
+export function useArkosStats(): ArkosStats {
   const {
     value: { payload },
   } = useWs("stats", "");
@@ -303,7 +303,7 @@ export function useInitialCameraState(
   camera: string,
   revalidateOnFocus: boolean,
 ): {
-  payload: FrigateCameraState;
+  payload: ArkosCameraState;
 } {
   const {
     value: { payload },
@@ -505,3 +505,8 @@ export function useNotificationTest(): {
   } = useWs("notification_test", "notification_test");
   return { payload: payload as string, send };
 }
+
+// For backward compatibility
+export const useFrigateEvents = useArkosEvents;
+export const useFrigateReviews = useArkosReviews;
+export const useFrigateStats = useArkosStats;

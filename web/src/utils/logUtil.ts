@@ -2,8 +2,8 @@ import { LogLine, LogSeverity, LogType } from "@/types/log";
 
 const pythonSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
 
-const frigateDateStamp = /\[[\d\s-:]*]/;
-const frigateSection = /[\w.]*/;
+const arkosDateStamp = /\[[\d\s-:]*]/;
+const arkosSection = /[\w.]*/;
 
 const goSeverity = /(DEB )|(INF )|(WRN )|(ERR )/;
 const goSection = /\[[\w]*]/;
@@ -11,10 +11,10 @@ const goSection = /\[[\w]*]/;
 const httpMethods = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
 
 export function parseLogLines(logService: LogType, logs: string[]) {
-  if (logService == "frigate") {
+  if (logService == "arkos") {
     return logs
       .map((line) => {
-        const match = frigateDateStamp.exec(line);
+        const match = arkosDateStamp.exec(line);
 
         if (!match) {
           const infoIndex = line.indexOf("[INFO]");
@@ -55,7 +55,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
           };
         }
 
-        const sectionMatch = frigateSection.exec(
+        const sectionMatch = arkosSection.exec(
           line.substring(match.index + match[0].length).trim(),
         );
 

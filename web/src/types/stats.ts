@@ -1,4 +1,4 @@
-export interface FrigateStats {
+export interface ArkosStats {
   cameras: { [camera_name: string]: CameraStats };
   cpu_usages: { [pid: string]: CpuStats };
   detectors: { [detectorKey: string]: DetectorStats };
@@ -112,3 +112,6 @@ export type Ffprobe = {
     }[];
   };
 };
+
+// For backward compatibility
+export type FrigateStats = ArkosStats;

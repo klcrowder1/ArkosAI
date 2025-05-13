@@ -91,7 +91,7 @@ export default function InputWithTags({
 
   const [searchHistory, setSearchHistory, searchHistoryLoaded] = usePersistence<
     SavedSearchQuery[]
-  >("frigate-search-history");
+  >("arkos-search-history");
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

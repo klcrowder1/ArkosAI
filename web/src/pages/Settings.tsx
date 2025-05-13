@@ -22,7 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isIOS, isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import { ArkosCameraConfig, ArkosConfig } from "@/types/arkosConfig";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
@@ -37,7 +37,7 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import ClassificationSettingsView from "@/views/settings/ClassificationSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
-import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
+import ArkosPlusSettingsView from "@/views/settings/ArkosPlusSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
@@ -55,7 +55,7 @@ const allSettingsViews = [
   "debug",
   "users",
   "notifications",
-  "frigateplus",
+  "arkosplus",
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
@@ -65,7 +65,7 @@ export default function Settings() {
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<ArkosConfig>("config");
 
   const [searchParams] = useSearchParams();
 
@@ -278,8 +278,8 @@ export default function Settings() {
         {page == "notifications" && (
           <NotificationView setUnsavedChanges={setUnsavedChanges} />
         )}
-        {page == "frigateplus" && (
-          <FrigatePlusSettingsView setUnsavedChanges={setUnsavedChanges} />
+        {page == "arkosplus" && (
+          <ArkosPlusSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
       </div>
       {confirmationDialogOpen && (
@@ -312,7 +312,7 @@ export default function Settings() {
 }
 
 type CameraSelectButtonProps = {
-  allCameras: CameraConfig[];
+  allCameras: ArkosCameraConfig[];
   selectedCamera: string;
   setSelectedCamera: React.Dispatch<React.SetStateAction<string>>;
   cameraEnabledStates: Record<string, boolean>;

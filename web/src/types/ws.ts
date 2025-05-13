@@ -1,6 +1,6 @@
 import { ReviewSegment } from "./review";
 
-type FrigateObjectState = {
+type ArkosObjectState = {
   id: string;
   camera: string;
   frame_time: number;
@@ -29,16 +29,16 @@ type FrigateObjectState = {
   };
 };
 
-export interface FrigateReview {
+export interface ArkosReview {
   type: "new" | "update" | "end";
   before: ReviewSegment;
   after: ReviewSegment;
 }
 
-export interface FrigateEvent {
+export interface ArkosEvent {
   type: "new" | "update" | "end";
-  before: FrigateObjectState;
-  after: FrigateObjectState;
+  before: ArkosObjectState;
+  after: ArkosObjectState;
 }
 
 export type ObjectType = {
@@ -51,7 +51,7 @@ export type ObjectType = {
   sub_label: string;
 };
 
-export interface FrigateCameraState {
+export interface ArkosCameraState {
   config: {
     enabled: boolean;
     detect: boolean;
@@ -84,3 +84,9 @@ export type EmbeddingsReindexProgressType = {
 };
 
 export type ToggleableSetting = "ON" | "OFF";
+
+// For backward compatibility
+export type FrigateObjectState = ArkosObjectState;
+export type FrigateReview = ArkosReview;
+export type FrigateEvent = ArkosEvent;
+export type FrigateCameraState = ArkosCameraState;
