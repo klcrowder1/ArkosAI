@@ -4,7 +4,7 @@ import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { ArkosConfig } from "@/types/arkosConfig";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   isDesktop,
@@ -34,7 +34,7 @@ export default function LiveBirdseyeView({
   toggleFullscreen,
 }: LiveBirdseyeViewProps) {
   const { t } = useTranslation(["views/live"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<ArkosConfig>("config");
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);

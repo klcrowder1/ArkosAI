@@ -3,8 +3,8 @@ import {
   AllGroupsStreamingSettings,
   BirdseyeConfig,
   CameraConfig,
-  FrigateConfig,
-} from "@/types/frigateConfig";
+  ArkosConfig,
+} from "@/types/arkosConfig";
 import React, {
   useCallback,
   useEffect,
@@ -81,7 +81,7 @@ export default function DraggableGridLayout({
   toggleFullscreen,
 }: DraggableGridLayoutProps) {
   const { t } = useTranslation(["views/live"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<ArkosConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   // preferred live modes per camera
@@ -813,7 +813,7 @@ type GridLiveContextMenuProps = {
   muteAll: () => void;
   unmuteAll: () => void;
   resetPreferredLiveMode: () => void;
-  config?: FrigateConfig;
+  config?: ArkosConfig;
 };
 
 const GridLiveContextMenu = React.forwardRef<

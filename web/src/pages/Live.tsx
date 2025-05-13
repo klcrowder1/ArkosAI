@@ -5,7 +5,7 @@ import {
   usePersistedOverlayState,
   useSearchEffect,
 } from "@/hooks/use-overlay-state";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { ArkosConfig } from "@/types/arkosConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
@@ -16,7 +16,7 @@ import useSWR from "swr";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<ArkosConfig>("config");
 
   // selection
 

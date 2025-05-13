@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import { CameraConfig, ArkosConfig } from "@/types/arkosConfig";
 import {
   LivePlayerError,
   LiveStreamMetadata,
@@ -121,7 +121,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Trans, useTranslation } from "react-i18next";
 
 type LiveCameraViewProps = {
-  config?: FrigateConfig;
+  config?: ArkosConfig;
   camera: CameraConfig;
   supportsFullscreen: boolean;
   fullscreen: boolean;
@@ -173,7 +173,7 @@ export default function LiveCameraView({
         (prod) =>
           prod.medias &&
           prod.medias.find((media) => media.includes("audio, sendonly")) !=
-            undefined,
+          undefined,
       ) != undefined
     );
   }, [cameraMetadata]);
@@ -187,7 +187,7 @@ export default function LiveCameraView({
         (prod) =>
           prod.medias &&
           prod.medias.find((media) => media.includes("audio, recvonly")) !=
-            undefined,
+          undefined,
       ) != undefined
     );
   }, [cameraMetadata]);
@@ -382,7 +382,7 @@ export default function LiveCameraView({
 
       // If the current device doesn't support locking orientation,
       // this promise will reject with an error that we can ignore
-      screenOrientation.lock(orientationForBestFit).catch(() => {});
+      screenOrientation.lock(orientationForBestFit).catch(() => { });
     }
 
     return () => screenOrientation.unlock();
@@ -559,7 +559,7 @@ export default function LiveCameraView({
                   disabled={!cameraEnabled}
                 />
               )}
-              <FrigateCameraFeatures
+              <ArkosCameraFeatures
                 camera={camera}
                 recordingEnabled={camera.record.enabled_in_config}
                 audioDetectEnabled={camera.audio.enabled_in_config}
@@ -973,7 +973,7 @@ function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
   ) : null;
 }
 
-type FrigateCameraFeaturesProps = {
+type ArkosCameraFeaturesProps = {
   camera: CameraConfig;
   recordingEnabled: boolean;
   audioDetectEnabled: boolean;
@@ -992,7 +992,7 @@ type FrigateCameraFeaturesProps = {
   supports2WayTalk: boolean;
   cameraEnabled: boolean;
 };
-function FrigateCameraFeatures({
+function ArkosCameraFeatures({
   camera,
   recordingEnabled,
   audioDetectEnabled,
@@ -1010,7 +1010,7 @@ function FrigateCameraFeatures({
   supportsAudioOutput,
   supports2WayTalk,
   cameraEnabled,
-}: FrigateCameraFeaturesProps) {
+}: ArkosCameraFeaturesProps) {
   const { t } = useTranslation(["views/live", "components/dialog"]);
 
   const { payload: detectState, send: sendDetect } = useDetectState(
@@ -1266,7 +1266,7 @@ function FrigateCameraFeatures({
                         })}
                         <div className="mt-2 flex items-center text-primary">
                           <Link
-                            to="https://docs.frigate.video/configuration/live"
+                            to="https://docs.arkos.ai/configuration/live"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline"
@@ -1344,14 +1344,14 @@ function FrigateCameraFeatures({
                                 {t("stream.audio.tips.title")}
                                 <div className="mt-2 flex items-center text-primary">
                                   <Link
-                                    to="https://docs.frigate.video/configuration/live"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline"
-                                  >
-                                    {t("stream.audio.tips.documentation")}
-                                    <LuExternalLink className="ml-2 inline-flex size-3" />
-                                  </Link>
+                              to="https://docs.arkos.ai/configuration/live"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline"
+                            >
+                              {t("stream.audio.tips.documentation")}
+                              <LuExternalLink className="ml-2 inline-flex size-3" />
+                            </Link>
                                 </div>
                               </PopoverContent>
                             </Popover>
@@ -1385,7 +1385,7 @@ function FrigateCameraFeatures({
                                   {t("stream.twoWayTalk.tips")}
                                   <div className="mt-2 flex items-center text-primary">
                                     <Link
-                                      to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
+                                      to="https://docs.arkos.ai/configuration/live/#webrtc-extra-configuration"
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="inline"
@@ -1592,7 +1592,7 @@ function FrigateCameraFeatures({
                     })}
                     <div className="mt-2 flex items-center text-primary">
                       <Link
-                        to="https://docs.frigate.video/configuration/live"
+                        to="https://docs.arkos.ai/configuration/live"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline"
@@ -1704,7 +1704,7 @@ function FrigateCameraFeatures({
                             {t("stream.twoWayTalk.tips")}
                             <div className="mt-2 flex items-center text-primary">
                               <Link
-                                to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
+                                to="https://docs.arkos.ai/configuration/live/#webrtc-extra-configuration"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline"

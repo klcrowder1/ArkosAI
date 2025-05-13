@@ -31,7 +31,7 @@ export interface FaceRecognitionConfig {
 export type SearchModel = "jinav1" | "jinav2";
 export type SearchModelSize = "small" | "large";
 
-export interface ArkosCameraConfig {
+export interface CameraConfig {
   audio: {
     enabled: boolean;
     enabled_in_config: boolean;
@@ -296,7 +296,7 @@ export interface ArkosConfig {
   birdseye: BirdseyeConfig;
 
   cameras: {
-    [cameraName: string]: ArkosCameraConfig;
+    [cameraName: string]: CameraConfig;
   };
 
   classification: {
@@ -540,7 +540,3 @@ export interface ArkosConfig {
 
   ui: UiConfig;
 }
-
-// For backward compatibility
-export type FrigateConfig = ArkosConfig;
-export type CameraConfig = ArkosCameraConfig;
